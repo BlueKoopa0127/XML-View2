@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState, useRef } from 'react';
-import { json2xml, xml2json } from 'xml-js';
+import { xml2json } from 'xml-js';
 import 'bulma/css/bulma.css';
 import * as d3 from "d3";
 
