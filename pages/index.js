@@ -1,37 +1,37 @@
-"use client";
-import { useEffect, useState, useRef } from "react";
-import { xml2json } from "xml-js";
-import "bulma/css/bulma.css";
-import * as d3 from "d3";
+'use client';
+import { useEffect, useState, useRef } from 'react';
+import { xml2json } from 'xml-js';
+import 'bulma/css/bulma.css';
+import * as d3 from 'd3';
 
 function translate(t) {
   const result = t
-    .split("<")
+    .split('<')
     .map((a) => {
-      return a.split(">");
+      return a.split('>');
     })
-    .filter((a) => a.indexOf("") == -1);
+    .filter((a) => a.indexOf('') == -1);
   //console.log(result);
   return result;
 }
 function getStyle(s) {
-  return s.split(";").map((a) => {
-    return a.split("=");
+  return s.split(';').map((a) => {
+    return a.split('=');
   });
 }
 
 export default function Home() {
-  const [xmlUrl, setXmlUrl] = useState("Miya_sample.drawio.xml");
+  const [xmlUrl, setXmlUrl] = useState('Miya_sample.drawio.xml');
   const [jsonUrl, setJsonUrl] = useState(
-    "https://script.googleusercontent.com/macros/echo?user_content_key=nd8R4gTB8cWnUxMh7wtmkwG_Tvf2v1OnzsL3415FrpqC35528jhS6BVOnm29dxk_F_KfEsPG9r7kRvtJfHi-Oc5Udodpl8L0m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnMcvwa9F95N400DZ4TmCuxfMiNlxraAC4kLmfCWiHTwpxI6af9-_YLu7nKW_RIEzYJL9Sn8v8UQx_AxJT9Z4uec1XCiqKzyYpA&lib=MQfS-BbL2BHguduB_Ix_KiE4IkG4fjIwP",
+    'https://script.googleusercontent.com/macros/echo?user_content_key=nd8R4gTB8cWnUxMh7wtmkwG_Tvf2v1OnzsL3415FrpqC35528jhS6BVOnm29dxk_F_KfEsPG9r7kRvtJfHi-Oc5Udodpl8L0m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnMcvwa9F95N400DZ4TmCuxfMiNlxraAC4kLmfCWiHTwpxI6af9-_YLu7nKW_RIEzYJL9Sn8v8UQx_AxJT9Z4uec1XCiqKzyYpA&lib=MQfS-BbL2BHguduB_Ix_KiE4IkG4fjIwP',
   );
   const [updateJson, setUpdateJson] = useState(0);
   const [xml, setXml] = useState(null);
   const [sheetData, setSheetData] = useState(null);
   const [displayText, setDisplayText] = useState([
-    "Source",
-    "Target",
-    "Detail",
+    'Source',
+    'Target',
+    'Detail',
   ]);
   const [jsonData, setJsonData] = useState(null);
 
@@ -100,7 +100,7 @@ export default function Home() {
               setJsonUrl(event.target.value);
             }}
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
+              if (event.key === 'Enter') {
                 setUpdateJson(updateJson + 1);
               }
             }}
@@ -114,23 +114,23 @@ export default function Home() {
                 <div
                   className="column"
                   style={{
-                    background: "#eee",
+                    background: '#eee',
                   }}
                 >
-                  {sheetData ? sheetData[0][i] : "Loading.."}
+                  {sheetData ? sheetData[0][i] : 'Loading..'}
                 </div>
                 <div
                   className="column is-1 has-text-centered"
                   style={{
-                    background: "#fff",
+                    background: '#fff',
                   }}
                 >
-                  {":"}
+                  {':'}
                 </div>
                 <div
                   className="column is-half"
                   style={{
-                    background: "#eee",
+                    background: '#eee',
                   }}
                 >
                   {d}
@@ -146,7 +146,7 @@ export default function Home() {
             <svg
               viewBox={`0 0 1200 1200`}
               style={{
-                backgroundColor: "gray",
+                backgroundColor: 'gray',
               }}
             >
               <marker
@@ -157,23 +157,23 @@ export default function Home() {
                 viewBox="0 0 10 10"
                 refX="5"
                 refY="5"
-                orient={"auto"}
+                orient={'auto'}
               >
                 <polygon points="0,0 1,5 0,10 6,5 " fill="black" />
               </marker>
               {data.map((e) => {
-                if ("mxGeometry" in e) {
+                if ('mxGeometry' in e) {
                   const attr = e.mxGeometry._attributes;
                   //console.log(e._attributes);
                   //console.log(attr);
-                  if ("x" in e.mxGeometry._attributes) {
+                  if ('x' in e.mxGeometry._attributes) {
                     // テキストオブジェクト
                     const style = getStyle(e._attributes.style);
                     //console.log(style);
                     const shape = style.find((a) => {
-                      return a[0] == "shape";
+                      return a[0] == 'shape';
                     });
-                    if (style[0][0] == "text") {
+                    if (style[0][0] == 'text') {
                       //画像のないテキストオブジェクト
                       return <DrawText key={e._attributes.id} e={e} />;
                     } else {
@@ -200,8 +200,8 @@ export default function Home() {
                       }
                     }
                   } else if (
-                    "source" in e._attributes &&
-                    "target" in e._attributes
+                    'source' in e._attributes &&
+                    'target' in e._attributes
                   ) {
                     return (
                       <DrawArray
@@ -230,7 +230,7 @@ function ZoomableSVG({ children, width, height }) {
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
   useEffect(() => {
-    const zoom = d3.zoom().on("zoom", (event) => {
+    const zoom = d3.zoom().on('zoom', (event) => {
       const { x, y, k } = event.transform;
       setK(k);
       setX(x);
@@ -242,7 +242,7 @@ function ZoomableSVG({ children, width, height }) {
     <svg
       ref={svgRef}
       viewBox="0 0 800 1200"
-      style={{ cursor: "grab", backgroundColor: "gray" }}
+      style={{ cursor: 'grab', backgroundColor: 'gray' }}
     >
       <g transform={`translate(${x},${y})scale(${k})`}>{children}</g>
     </svg>
@@ -343,13 +343,13 @@ function DrawArray({ data, e, sheetData, displayText, setDisplayText }) {
   const style = getStyle(e._attributes.style);
   //console.log(style);
   const [sx, sy] = angle(
-    (style.find((e) => e[0] == "exitX") ?? ["", 0.5])[1] * 1,
-    (style.find((e) => e[0] == "exitY") ?? ["", 0.5])[1] * 1,
+    (style.find((e) => e[0] == 'exitX') ?? ['', 0.5])[1] * 1,
+    (style.find((e) => e[0] == 'exitY') ?? ['', 0.5])[1] * 1,
     r,
   );
   const [tx, ty] = angle(
-    (style.find((e) => e[0] == "entryX") ?? ["", 0.5])[1] * 1,
-    (style.find((e) => e[0] == "entryY") ?? ["", 0.5])[1] * 1,
+    (style.find((e) => e[0] == 'entryX') ?? ['', 0.5])[1] * 1,
+    (style.find((e) => e[0] == 'entryY') ?? ['', 0.5])[1] * 1,
     r,
   );
   const sourcePointXY = [
@@ -367,7 +367,7 @@ function DrawArray({ data, e, sheetData, displayText, setDisplayText }) {
   //console.log(sourcePoint);
   //console.log(targetPoint);
   const getArrayPoints = () => {
-    if ("Array" in e.mxGeometry) {
+    if ('Array' in e.mxGeometry) {
       const p = e.mxGeometry.Array.mxPoint;
       if (Array.isArray(p)) {
         return e.mxGeometry.Array.mxPoint.map((f) => {
@@ -395,7 +395,7 @@ function DrawArray({ data, e, sheetData, displayText, setDisplayText }) {
         console.log(targetName);
         const row = sheetData.find((r) => {
           return r[0] == sourceName && r[1] == targetName;
-        }) ?? [sourceName, targetName, "No Data"];
+        }) ?? [sourceName, targetName, 'No Data'];
         setDisplayText(row);
         console.log(row);
       }}
@@ -413,10 +413,10 @@ function DrawArray({ data, e, sheetData, displayText, setDisplayText }) {
                 strokeWidth={3}
                 stroke={
                   sourceName == displayText[0] && targetName == displayText[1]
-                    ? "red"
-                    : "black"
+                    ? 'red'
+                    : 'black'
                 }
-                markerEnd={ary.length - 2 == index ? "url(#mu_mh)" : ""}
+                markerEnd={ary.length - 2 == index ? 'url(#mu_mh)' : ''}
               />
               <line
                 key={1}
