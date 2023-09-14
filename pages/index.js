@@ -11,7 +11,7 @@ function translate(t) {
       return a.split('>');
     })
     .filter((a) => a.indexOf('') == -1);
-  //console.log(result);
+  //console.log(result)
   return result;
 }
 function getStyle(s) {
