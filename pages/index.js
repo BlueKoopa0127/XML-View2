@@ -1,14 +1,8 @@
-import { Sample } from '../components/sample';
 import { useRecoilState, atom } from 'recoil';
 import { InputMenu, dataImport } from '../components/inputManu';
 import { DrawChart } from '../components/drawChart';
 import { Container } from '@mui/system';
 import { Grid, Typography } from '@mui/material';
-
-export const countState = atom({
-  key: 'countState',
-  default: 0,
-});
 
 export const drawDataState = atom({
   key: 'drawDataState',
@@ -21,12 +15,7 @@ export const relatedDataState = atom({
 });
 
 export default function Home({ Title }) {
-  const [count, setCount] = useRecoilState(countState);
-  const [drawData, setDrawData] = useRecoilState(drawDataState);
-  const [relatedData, setRelatedData] = useRecoilState(relatedDataState);
   dataImport();
-  console.log(drawData);
-  console.log(relatedData);
   return (
     <Container>
       <Typography variant="h1" align="center">
