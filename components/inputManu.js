@@ -93,7 +93,10 @@ export function dataImport() {
       const res = await fetch(url);
       if (res.status == 200) {
         const text = await res.text();
-        setDrawData(JSON.parse(xml2json(text, { compact: true, spaces: 2 })));
+        setDrawData(
+          JSON.parse(xml2json(text, { compact: true, spaces: 2 })).mxfile
+            .diagram.mxGraphModel.root.mxCell,
+        );
       }
     };
     fetchData();

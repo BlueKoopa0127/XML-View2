@@ -6,12 +6,12 @@ import { Grid, Typography } from '@mui/material';
 
 export const drawDataState = atom({
   key: 'drawDataState',
-  default: null,
+  default: [],
 });
 
 export const relatedDataState = atom({
   key: 'relatedDataState',
-  default: null,
+  default: [],
 });
 
 export default function Home({ Title }) {
