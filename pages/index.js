@@ -1,6 +1,7 @@
 import { useRecoilState, atom } from 'recoil';
 import { InputMenu, dataImport } from '../components/inputManu';
 import { DrawChart } from '../components/drawChart';
+import { OutputMenu } from '../components/outputMenu';
 import { Container } from '@mui/system';
 import { Grid, Typography } from '@mui/material';
 
@@ -24,7 +25,7 @@ export default function Home({ Title }) {
       <Grid container spacing={2}>
         <Grid item xs={5}>
           <InputMenu />
-          <div>結果</div>
+          <OutputMenu />
         </Grid>
         <Grid item xs={7}>
           <DrawChart />
