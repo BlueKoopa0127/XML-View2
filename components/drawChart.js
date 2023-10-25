@@ -1,14 +1,17 @@
-import { useRecoilValue } from 'recoil';
-import { drawDataState, relatedDataState } from '../pages';
+import { useRecoilValue, useRecoilState, atom } from 'recoil';
+import { drawDataState } from '../pages';
+
+export const selectedObjectState = atom({
+  key: 'selectedObjectState',
+  default: null,
+});
 
 export function DrawChart() {
   const drawData = useRecoilValue(drawDataState);
-  const relatedData = useRecoilValue(relatedDataState);
   console.log(drawData);
-  console.log(relatedData);
   return (
     <svg
-      viewBox={`0 0 1200 1200`}
+      viewBox={`0 0 800 800`}
       style={{
         backgroundColor: '#ddd',
       }}
@@ -51,7 +54,7 @@ export function DrawChart() {
           }
         } //x座標は無いけどsourceとtargetが存在する場合、矢印の描画
         else if ('source' in e._attributes && 'target' in e._attributes) {
-          return <></>;
+          return <DrawArray key={i} e={e} />;
         }
       })}
     </svg>
@@ -72,6 +75,18 @@ function getStyle(s) {
   return s.split(';').map((a) => {
     return a.split('=');
   });
+}
+function angle(x, y, r) {
+  if (x == 0.5 && y == 0.5) {
+    return [0, 0];
+  }
+  if (x == 0.5) {
+    return [0, r * (y ? 1 : -1)];
+  }
+  if (y == 0.5) {
+    return [r * (x ? 1 : -1), 0];
+  }
+  return [(r * (x ? 1 : -1)) / Math.SQRT2, (r * (y ? 1 : -1)) / Math.SQRT2];
 }
 
 function DrawText({ e }) {
@@ -97,25 +112,17 @@ function DrawText({ e }) {
 }
 
 function DrawShape({ e, shape }) {
-  const relatedData = useRecoilValue(relatedDataState);
   const attr = e.mxGeometry._attributes;
+  const [selectedObject, setSelectedObject] =
+    useRecoilState(selectedObjectState);
   //console.log(e);
   return (
     <g
       key={e._attributes.id}
       onClick={() => {
-        const b = translate(e._attributes.value);
-        const n = b[0][1];
-        console.log(n);
-        const sender = relatedData.filter((c) => {
-          return c[0] == n;
-        });
-        const receiver = relatedData.filter((c) => {
-          return c[1] == n;
-        });
-        console.log(sender);
-        console.log(receiver);
+        setSelectedObject(e);
       }}
+      style={{ userSelect: 'none' }}
     >
       <image
         href={`${shape}.png`}
@@ -133,6 +140,7 @@ function DrawShape({ e, shape }) {
             width={attr.width}
             height={attr.height}
             textAnchor="middle"
+            fill={selectedObject == e ? 'red' : 'black'}
           >
             {a[a.length - 1]}
           </text>
@@ -142,12 +150,15 @@ function DrawShape({ e, shape }) {
   );
 }
 
-function DrawArray({ data, e, sheetData, displayText, setDisplayText }) {
+function DrawArray({ e }) {
+  const drawData = useRecoilValue(drawDataState);
+  const [selectedObject, setSelectedObject] =
+    useRecoilState(selectedObjectState);
   //console.log(e._attributes.style);
-  const sourcePoint = data.find(
+  const sourcePoint = drawData.find(
     (element) => e._attributes.source == element._attributes.id,
   );
-  const targetPoint = data.find(
+  const targetPoint = drawData.find(
     (element) => e._attributes.target == element._attributes.id,
   );
   const sourcePointAttributes = sourcePoint.mxGeometry._attributes;
@@ -198,19 +209,14 @@ function DrawArray({ data, e, sheetData, displayText, setDisplayText }) {
     targetPointXY,
   );
   //console.log(arrayPoints);
-  const sourceName = translate(sourcePoint._attributes.value)[0][1];
-  const targetName = translate(targetPoint._attributes.value)[0][1];
+  //const sourceName = translate(sourcePoint._attributes.value)[0][1];
+  //const targetName = translate(targetPoint._attributes.value)[0][1];
+
   return (
     <g
       key={e._attributes.id}
       onClick={() => {
-        console.log(sourceName);
-        console.log(targetName);
-        const row = sheetData.find((r) => {
-          return r[0] == sourceName && r[1] == targetName;
-        }) ?? [sourceName, targetName, 'No Data'];
-        setDisplayText(row);
-        console.log(row);
+        setSelectedObject(e);
       }}
     >
       {arrayPoints.map((p, index, ary) => {
@@ -224,11 +230,7 @@ function DrawArray({ data, e, sheetData, displayText, setDisplayText }) {
                 x2={arrayPoints[index + 1][0]}
                 y2={arrayPoints[index + 1][1]}
                 strokeWidth={3}
-                stroke={
-                  sourceName == displayText[0] && targetName == displayText[1]
-                    ? 'red'
-                    : 'black'
-                }
+                stroke={selectedObject == e ? 'red' : 'black'}
                 markerEnd={ary.length - 2 == index ? 'url(#mu_mh)' : ''}
               />
               <line
