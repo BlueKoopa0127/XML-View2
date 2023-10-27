@@ -30,9 +30,9 @@ export function DrawChart() {
       </marker>
       {drawData.map((e, i) => {
         if (e.type == 'text') {
-          return <DrawText key={e._attributes.id} e={e} />;
+          return <DrawText key={e.id} e={e} />;
         } else if (e.type == 'shape') {
-          return <DrawShape key={e._attributes.id} e={e} shape={e.shape} />;
+          return <DrawShape key={e.id} e={e} shape={e.shape} />;
         } else if (e.type == 'arrow') {
           return <DrawArrow key={i} e={e} />;
         }
@@ -41,11 +41,6 @@ export function DrawChart() {
   );
 }
 
-function getStyle(s) {
-  return s.split(';').map((a) => {
-    return a.split('=');
-  });
-}
 function angle(x, y, r) {
   if (x == 0.5 && y == 0.5) {
     return [0, 0];
@@ -62,7 +57,7 @@ function angle(x, y, r) {
 function DrawText({ e }) {
   const attr = e.mxGeometry._attributes;
   return (
-    <g key={e._attributes.id}>
+    <g key={e.id}>
       {e.text.map((a, index) => {
         return (
           <text
@@ -88,7 +83,7 @@ function DrawShape({ e, shape }) {
   //console.log(e);
   return (
     <g
-      key={e._attributes.id}
+      key={e.id}
       onClick={() => {
         setSelectedObject(e);
       }}
@@ -121,29 +116,20 @@ function DrawShape({ e, shape }) {
 }
 
 function DrawArrow({ e }) {
-  const drawData = useRecoilValue(drawDataState);
   const [selectedObject, setSelectedObject] =
     useRecoilState(selectedObjectState);
-  //console.log(e._attributes.style);
-  const sourcePoint = drawData.find(
-    (element) => e._attributes.source == element._attributes.id,
-  );
-  const targetPoint = drawData.find(
-    (element) => e._attributes.target == element._attributes.id,
-  );
-  const sourcePointAttributes = sourcePoint.mxGeometry._attributes;
-  const targetPointAttributes = targetPoint.mxGeometry._attributes;
+  const sourcePointAttributes = e.source.mxGeometry._attributes;
+  const targetPointAttributes = e.target.mxGeometry._attributes;
   const r = (sourcePointAttributes.width * 1) / 2;
-  const style = getStyle(e._attributes.style);
-  //console.log(style);
+
   const [sx, sy] = angle(
-    (style.find((e) => e[0] == 'exitX') ?? ['', 0.5])[1] * 1,
-    (style.find((e) => e[0] == 'exitY') ?? ['', 0.5])[1] * 1,
+    (e.style.find((e) => e[0] == 'exitX') ?? ['', 0.5])[1] * 1,
+    (e.style.find((e) => e[0] == 'exitY') ?? ['', 0.5])[1] * 1,
     r,
   );
   const [tx, ty] = angle(
-    (style.find((e) => e[0] == 'entryX') ?? ['', 0.5])[1] * 1,
-    (style.find((e) => e[0] == 'entryY') ?? ['', 0.5])[1] * 1,
+    (e.style.find((e) => e[0] == 'entryX') ?? ['', 0.5])[1] * 1,
+    (e.style.find((e) => e[0] == 'entryY') ?? ['', 0.5])[1] * 1,
     r,
   );
   const sourcePointXY = [
@@ -181,7 +167,7 @@ function DrawArrow({ e }) {
 
   return (
     <g
-      key={e._attributes.id}
+      key={e.id}
       onClick={() => {
         setSelectedObject(e);
       }}
@@ -189,7 +175,7 @@ function DrawArrow({ e }) {
       {arrayPoints.map((p, index, ary) => {
         if (index < arrayPoints.length - 1) {
           return (
-            <g key={e._attributes.id + index}>
+            <g key={e.id + index}>
               <line
                 key={0}
                 x1={p[0]}

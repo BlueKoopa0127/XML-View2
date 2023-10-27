@@ -128,28 +128,50 @@ export function dataImport() {
               if (style[0][0] == 'text') {
                 //画像のないテキストオブジェクト
                 return {
-                  ...e,
+                  id: e._attributes.id,
+                  mxGeometry: e.mxGeometry,
                   type: 'text',
+                  style: style,
                   text: translate(e._attributes.value),
                 };
               } else {
                 // 画像のあるテキストオブジェクト
                 return {
-                  ...e,
+                  id: e._attributes.id,
+                  mxGeometry: e.mxGeometry,
                   type: 'shape',
+                  style: style,
                   text: translate(e._attributes.value),
                   shape: shape == null ? style[0][0] : shape[1],
                 };
               }
             } //x座標は無いけどsourceとtargetが存在する場合、矢印の描画
             else if ('source' in e._attributes && 'target' in e._attributes) {
-              return { ...e, type: 'arrow' };
+              return {
+                id: e._attributes.id,
+                mxGeometry: e.mxGeometry,
+                type: 'arrow',
+                style: getStyle(e._attributes.style),
+                source: e._attributes.source,
+                target: e._attributes.target,
+              };
             }
           })
           .filter((e) => {
             return e.type != 'null';
           });
-        setDrawData(formatDrawData);
+        const edgeFormatDrawData = formatDrawData.map((e) => {
+          if (e.type == 'arrow') {
+            return {
+              ...e,
+              source: formatDrawData.find((f) => f.id == e.source),
+              target: formatDrawData.find((f) => f.id == e.target),
+            };
+          } else {
+            return e;
+          }
+        });
+        setDrawData(edgeFormatDrawData);
       }
     };
     fetchData();
