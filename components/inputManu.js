@@ -93,10 +93,63 @@ export function dataImport() {
       const res = await fetch(url);
       if (res.status == 200) {
         const text = await res.text();
-        setDrawData(
-          JSON.parse(xml2json(text, { compact: true, spaces: 2 })).mxfile
-            .diagram.mxGraphModel.root.mxCell,
-        );
+        const drawData = JSON.parse(
+          xml2json(text, { compact: true, spaces: 2 }),
+        ).mxfile.diagram.mxGraphModel.root.mxCell;
+
+        function getStyle(s) {
+          return s.split(';').map((a) => {
+            return a.split('=');
+          });
+        }
+        function translate(t) {
+          const result = t
+            .split('<')
+            .map((a) => {
+              return a.split('>');
+            })
+            .filter((a) => a.indexOf('') == -1);
+          //console.log(result)
+          return result;
+        }
+
+        const formatDrawData = drawData
+          .map((e) => {
+            //存在しない場合、空要素を返す
+            if (!('mxGeometry' in e)) {
+              return { ...e, type: 'null' };
+            }
+            //x座標がある場合
+            if ('x' in e.mxGeometry._attributes) {
+              const style = getStyle(e._attributes.style);
+              const shape = style.find((a) => {
+                return a[0] == 'shape';
+              });
+              if (style[0][0] == 'text') {
+                //画像のないテキストオブジェクト
+                return {
+                  ...e,
+                  type: 'text',
+                  text: translate(e._attributes.value),
+                };
+              } else {
+                // 画像のあるテキストオブジェクト
+                return {
+                  ...e,
+                  type: 'shape',
+                  text: translate(e._attributes.value),
+                  shape: shape == null ? style[0][0] : shape[1],
+                };
+              }
+            } //x座標は無いけどsourceとtargetが存在する場合、矢印の描画
+            else if ('source' in e._attributes && 'target' in e._attributes) {
+              return { ...e, type: 'arrow' };
+            }
+          })
+          .filter((e) => {
+            return e.type != 'null';
+          });
+        setDrawData(formatDrawData);
       }
     };
     fetchData();

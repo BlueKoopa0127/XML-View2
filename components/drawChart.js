@@ -29,48 +29,18 @@ export function DrawChart() {
         <polygon points="0,0 1,5 0,10 6,5 " fill="black" />
       </marker>
       {drawData.map((e, i) => {
-        //存在しない場合、空要素を返す
-        if (!('mxGeometry' in e)) {
-          return <div key={i}></div>;
-        }
-        //x座標がある場合
-        if ('x' in e.mxGeometry._attributes) {
-          const style = getStyle(e._attributes.style);
-          const shape = style.find((a) => {
-            return a[0] == 'shape';
-          });
-          if (style[0][0] == 'text') {
-            //画像のないテキストオブジェクト
-            return <DrawText key={e._attributes.id} e={e} />;
-          } else {
-            // 画像のあるテキストオブジェクト
-            return (
-              <DrawShape
-                key={e._attributes.id}
-                e={e}
-                shape={shape == null ? style[0][0] : shape[1]}
-              />
-            );
-          }
-        } //x座標は無いけどsourceとtargetが存在する場合、矢印の描画
-        else if ('source' in e._attributes && 'target' in e._attributes) {
-          return <DrawArray key={i} e={e} />;
+        if (e.type == 'text') {
+          return <DrawText key={e._attributes.id} e={e} />;
+        } else if (e.type == 'shape') {
+          return <DrawShape key={e._attributes.id} e={e} shape={e.shape} />;
+        } else if (e.type == 'arrow') {
+          return <DrawArrow key={i} e={e} />;
         }
       })}
     </svg>
   );
 }
 
-function translate(t) {
-  const result = t
-    .split('<')
-    .map((a) => {
-      return a.split('>');
-    })
-    .filter((a) => a.indexOf('') == -1);
-  //console.log(result)
-  return result;
-}
 function getStyle(s) {
   return s.split(';').map((a) => {
     return a.split('=');
@@ -93,7 +63,7 @@ function DrawText({ e }) {
   const attr = e.mxGeometry._attributes;
   return (
     <g key={e._attributes.id}>
-      {translate(e._attributes.value).map((a, index) => {
+      {e.text.map((a, index) => {
         return (
           <text
             key={index}
@@ -131,7 +101,7 @@ function DrawShape({ e, shape }) {
         width={attr.width}
         height={attr.height}
       />
-      {translate(e._attributes.value).map((a, index) => {
+      {e.text.map((a, index) => {
         return (
           <text
             key={index}
@@ -150,7 +120,7 @@ function DrawShape({ e, shape }) {
   );
 }
 
-function DrawArray({ e }) {
+function DrawArrow({ e }) {
   const drawData = useRecoilValue(drawDataState);
   const [selectedObject, setSelectedObject] =
     useRecoilState(selectedObjectState);
@@ -208,9 +178,6 @@ function DrawArray({ e }) {
     getArrayPoints() ?? [],
     targetPointXY,
   );
-  //console.log(arrayPoints);
-  //const sourceName = translate(sourcePoint._attributes.value)[0][1];
-  //const targetName = translate(targetPoint._attributes.value)[0][1];
 
   return (
     <g
