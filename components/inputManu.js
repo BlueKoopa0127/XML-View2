@@ -82,7 +82,7 @@ export function dataImport() {
   const drawDataUrl = useRecoilValue(drawDataUrlState);
   const relatedDataUrl = useRecoilValue(relatedDataUrlState);
   const setDrawData = useSetRecoilState(drawDataState);
-  const setRelatedData = useSetRecoilState(relatedDataState);
+  const [relatedData, setRelatedData] = useRecoilState(relatedDataState);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,7 +91,7 @@ export function dataImport() {
           ? drawDataUrl
           : window.URL.createObjectURL(drawDataUrl);
       const res = await fetch(url);
-      if (res.status == 200) {
+      if (res.status == 200 && relatedData != null && relatedData.length > 0) {
         const text = await res.text();
         const drawData = JSON.parse(
           xml2json(text, { compact: true, spaces: 2 }),
@@ -199,11 +199,35 @@ export function dataImport() {
             return e;
           }
         });
-        setDrawData(nodeFormatDrawData);
+        const relatedFormatDrawData = nodeFormatDrawData.map((e) => {
+          if (e.type == 'shape') {
+            return {
+              ...e,
+              literature: relatedData.filter(
+                (f) =>
+                  (e.sourceNodes.map((g) => g.text[0][1]).includes(f[0]) &&
+                    f[1] == e.text[0][1]) ||
+                  (e.targetNodes.map((g) => g.text[0][1]).includes(f[1]) &&
+                    f[0] == e.text[0][1]),
+              ),
+            };
+          } else if (e.type == 'arrow') {
+            return {
+              ...e,
+              literature: relatedData.filter(
+                (f) =>
+                  f[0] == e.source.text[0][1] && f[1] == e.target.text[0][1],
+              ),
+            };
+          } else {
+            return e;
+          }
+        });
+        setDrawData(relatedFormatDrawData);
       }
     };
     fetchData();
-  }, [drawDataUrl]);
+  }, [drawDataUrl, relatedData]);
 
   useEffect(() => {
     const fetchData = async () => {
