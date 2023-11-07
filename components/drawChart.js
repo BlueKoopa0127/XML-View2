@@ -67,6 +67,7 @@ function DrawText({ e }) {
             width={attr.width}
             height={attr.height}
             textAnchor="middle"
+            style={{ userSelect: 'none' }}
           >
             {a[a.length - 1]}
           </text>
@@ -87,7 +88,7 @@ function DrawShape({ e, shape }) {
       onClick={() => {
         setSelectedObject(e);
       }}
-      style={{ userSelect: 'none' }}
+      style={{ userSelect: 'none', cursor: 'pointer' }}
     >
       <image
         href={`${shape}.png`}
@@ -171,6 +172,7 @@ function DrawArrow({ e }) {
       onClick={() => {
         setSelectedObject(e);
       }}
+      style={{ cursor: 'pointer' }}
     >
       {arrayPoints.map((p, index, ary) => {
         if (index < arrayPoints.length - 1) {

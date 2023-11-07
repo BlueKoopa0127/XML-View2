@@ -171,7 +171,35 @@ export function dataImport() {
             return e;
           }
         });
-        setDrawData(edgeFormatDrawData);
+
+        const nodeFormatDrawData = edgeFormatDrawData.map((e) => {
+          if (e.type == 'shape') {
+            return {
+              ...e,
+              sourceNodes: edgeFormatDrawData
+                .filter((f) => f.type == 'arrow')
+                .map((f) => {
+                  if (f.target.id == e.id) {
+                    return f.source;
+                  }
+                  return null;
+                })
+                .filter((f) => f != undefined),
+              targetNodes: edgeFormatDrawData
+                .filter((f) => f.type == 'arrow')
+                .map((f) => {
+                  if (f.source.id == e.id) {
+                    return f.target;
+                  }
+                  return null;
+                })
+                .filter((f) => f != undefined),
+            };
+          } else {
+            return e;
+          }
+        });
+        setDrawData(nodeFormatDrawData);
       }
     };
     fetchData();
