@@ -1,4 +1,9 @@
-import { useRecoilValue, useRecoilState, atom } from 'recoil';
+import {
+  useRecoilValue,
+  useRecoilState,
+  useSetRecoilState,
+  atom,
+} from 'recoil';
 import { drawDataState } from '../pages';
 
 export const selectedObjectState = atom({
@@ -8,6 +13,7 @@ export const selectedObjectState = atom({
 
 export function DrawChart() {
   const drawData = useRecoilValue(drawDataState);
+  const setSelectedObject = useSetRecoilState(selectedObjectState);
   console.log(drawData);
   return (
     <svg
@@ -31,8 +37,27 @@ export function DrawChart() {
       {drawData.map((e, i) => {
         if (e.type == 'text') {
           return <DrawText key={e.id} e={e} />;
+        } else if (e.type == 'rounded') {
+          return (
+            <DrawShape
+              key={e.id}
+              e={e}
+              shape={e.shape}
+              style={{ userSelect: 'none' }}
+            />
+          );
         } else if (e.type == 'shape') {
-          return <DrawShape key={e.id} e={e} shape={e.shape} />;
+          return (
+            <g
+              key={e.id}
+              onClick={() => {
+                setSelectedObject(e);
+              }}
+              style={{ userSelect: 'none', cursor: 'pointer' }}
+            >
+              <DrawShape e={e} shape={e.shape} />
+            </g>
+          );
         } else if (e.type == 'arrow') {
           return <DrawArrow key={i} e={e} />;
         }
@@ -79,17 +104,10 @@ function DrawText({ e }) {
 
 function DrawShape({ e, shape }) {
   const attr = e.mxGeometry._attributes;
-  const [selectedObject, setSelectedObject] =
-    useRecoilState(selectedObjectState);
+  const selectedObject = useRecoilValue(selectedObjectState);
   //console.log(e);
   return (
-    <g
-      key={e.id}
-      onClick={() => {
-        setSelectedObject(e);
-      }}
-      style={{ userSelect: 'none', cursor: 'pointer' }}
-    >
+    <g key={e.id}>
       <image
         href={`${shape}.png`}
         x={attr.x}

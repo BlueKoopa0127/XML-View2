@@ -122,9 +122,7 @@ export function dataImport() {
             //x座標がある場合
             if ('x' in e.mxGeometry._attributes) {
               const style = getStyle(e._attributes.style);
-              const shape = style.find((a) => {
-                return a[0] == 'shape';
-              });
+
               if (style[0][0] == 'text') {
                 //画像のないテキストオブジェクト
                 return {
@@ -135,15 +133,26 @@ export function dataImport() {
                   text: translate(e._attributes.value),
                 };
               } else {
-                // 画像のあるテキストオブジェクト
-                return {
-                  id: e._attributes.id,
-                  mxGeometry: e.mxGeometry,
-                  type: 'shape',
-                  style: style,
-                  text: translate(e._attributes.value),
-                  shape: shape == null ? style[0][0] : shape[1],
-                };
+                if (style[0][0] == 'rounded') {
+                  return {
+                    id: e._attributes.id,
+                    mxGeometry: e.mxGeometry,
+                    type: 'rounded',
+                    style: style,
+                    text: translate(e._attributes.value),
+                    shape: style[0][0],
+                  };
+                } else {
+                  // 画像のあるテキストオブジェクト
+                  return {
+                    id: e._attributes.id,
+                    mxGeometry: e.mxGeometry,
+                    type: 'shape',
+                    style: style,
+                    text: translate(e._attributes.value),
+                    shape: style[0][0],
+                  };
+                }
               }
             } //x座標は無いけどsourceとtargetが存在する場合、矢印の描画
             else if ('source' in e._attributes && 'target' in e._attributes) {
@@ -160,6 +169,14 @@ export function dataImport() {
           .filter((e) => {
             return e.type != 'null';
           });
+        const nodeData = formatDrawData
+          .filter((e) => e.type == 'shape')
+          .map((e) => e.text[0][1]);
+        // console.log(nodeData);
+        const filteredRelatedData = relatedData.filter((e) => {
+          return nodeData.includes(e[0]) && nodeData.includes(e[1]);
+        });
+        // console.log(filteredRelatedData);
         const edgeFormatDrawData = formatDrawData.map((e) => {
           if (e.type == 'arrow') {
             return {
@@ -203,7 +220,7 @@ export function dataImport() {
           if (e.type == 'shape') {
             return {
               ...e,
-              literature: relatedData.filter(
+              literature: filteredRelatedData.filter(
                 (f) =>
                   (e.sourceNodes.map((g) => g.text[0][1]).includes(f[0]) &&
                     f[1] == e.text[0][1]) ||
@@ -214,7 +231,7 @@ export function dataImport() {
           } else if (e.type == 'arrow') {
             return {
               ...e,
-              literature: relatedData.filter(
+              literature: filteredRelatedData.filter(
                 (f) =>
                   f[0] == e.source.text[0][1] && f[1] == e.target.text[0][1],
               ),

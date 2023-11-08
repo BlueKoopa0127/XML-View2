@@ -11,9 +11,9 @@ export function OutputMenu() {
   return (
     <div>
       <div>結果</div>
-      {selectedObject.literature.map((e) => {
+      {selectedObject.literature.map((e, i) => {
         return (
-          <div>
+          <div key={i}>
             {e[0]} {e[1]} {e[2]}
           </div>
         );
