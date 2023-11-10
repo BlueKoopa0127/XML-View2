@@ -150,6 +150,7 @@ export function dataImport() {
                     type: 'shape',
                     style: style,
                     text: translate(e._attributes.value),
+                    name: translate(e._attributes.value)[0][1],
                     shape: style[0][0],
                   };
                 }
