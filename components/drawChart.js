@@ -5,6 +5,7 @@ import {
   atom,
 } from 'recoil';
 import { drawDataState } from '../pages';
+import { selectedRelationState } from './outputMenu';
 
 export const selectedObjectState = atom({
   key: 'selectedObjectState',
@@ -105,6 +106,10 @@ function DrawText({ e }) {
 function DrawShape({ e, shape }) {
   const attr = e.mxGeometry._attributes;
   const selectedObject = useRecoilValue(selectedObjectState);
+  const selectedRelation = useRecoilValue(selectedRelationState);
+  const isRelation = selectedRelation
+    ? selectedRelation[0] == e.name || selectedRelation[1] == e.name
+    : false;
   //console.log(e);
   return (
     <g key={e.id}>
@@ -124,7 +129,7 @@ function DrawShape({ e, shape }) {
             width={attr.width}
             height={attr.height}
             textAnchor="middle"
-            fill={selectedObject == e ? 'red' : 'black'}
+            fill={selectedObject == e ? 'red' : isRelation ? 'blue' : 'black'}
           >
             {a[a.length - 1]}
           </text>
@@ -137,6 +142,11 @@ function DrawShape({ e, shape }) {
 function DrawArrow({ e }) {
   const [selectedObject, setSelectedObject] =
     useRecoilState(selectedObjectState);
+  const selectedRelation = useRecoilValue(selectedRelationState);
+  const hightlightRelation = selectedRelation
+    ? selectedRelation[0] == e.source.text[0][1] &&
+      selectedRelation[1] == e.target.text[0][1]
+    : false;
   const sourcePointAttributes = e.source.mxGeometry._attributes;
   const targetPointAttributes = e.target.mxGeometry._attributes;
   const r = (sourcePointAttributes.width * 1) / 2;
@@ -203,7 +213,9 @@ function DrawArrow({ e }) {
                 x2={arrayPoints[index + 1][0]}
                 y2={arrayPoints[index + 1][1]}
                 strokeWidth={3}
-                stroke={selectedObject == e ? 'red' : 'black'}
+                stroke={
+                  selectedObject == e || hightlightRelation ? 'red' : 'black'
+                }
                 markerEnd={ary.length - 2 == index ? 'url(#mu_mh)' : ''}
               />
               <line
