@@ -39,14 +39,7 @@ export function DrawChart() {
         if (e.type == 'text') {
           return <DrawText key={e.id} e={e} />;
         } else if (e.type == 'rounded') {
-          return (
-            <DrawShape
-              key={e.id}
-              e={e}
-              shape={e.shape}
-              style={{ userSelect: 'none' }}
-            />
-          );
+          return <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />;
         } else if (e.type == 'shape') {
           return (
             <g
@@ -56,7 +49,7 @@ export function DrawChart() {
               }}
               style={{ userSelect: 'none', cursor: 'pointer' }}
             >
-              <DrawShape e={e} shape={e.shape} />
+              <DrawShape e={e} />
             </g>
           );
         } else if (e.type == 'arrow') {
@@ -103,23 +96,42 @@ function DrawText({ e }) {
   );
 }
 
-function DrawShape({ e, shape }) {
+function DrawShape({ e }) {
   const attr = e.mxGeometry._attributes;
   const selectedObject = useRecoilValue(selectedObjectState);
   const selectedRelation = useRecoilValue(selectedRelationState);
   const isRelation = selectedRelation
     ? selectedRelation[0] == e.name || selectedRelation[1] == e.name
     : false;
+  const isSource = selectedRelation ? selectedRelation[0] == e.name : false;
+  const isTarget = selectedRelation ? selectedRelation[1] == e.name : false;
+  const color = isSource
+    ? 'red'
+    : isTarget
+    ? 'blue'
+    : selectedObject == e
+    ? 'red'
+    : 'black';
   //console.log(e);
   return (
     <g key={e.id}>
-      <image
-        href={`${shape}.png`}
-        x={attr.x}
-        y={attr.y}
-        width={attr.width}
-        height={attr.height}
-      />
+      {e.type == 'shape' ? (
+        <circle
+          cx={attr.x * 1 + attr.width / 2}
+          cy={attr.y * 1 + attr.height / 2}
+          r={40}
+          fill="white"
+          stroke={color}
+        />
+      ) : (
+        <rect
+          x={attr.x}
+          y={attr.y}
+          width={attr.width}
+          height={attr.height}
+          fill="white"
+        />
+      )}
       {e.text.map((a, index) => {
         return (
           <text
@@ -129,7 +141,7 @@ function DrawShape({ e, shape }) {
             width={attr.width}
             height={attr.height}
             textAnchor="middle"
-            fill={selectedObject == e ? 'red' : isRelation ? 'blue' : 'black'}
+            fill={color}
           >
             {a[a.length - 1]}
           </text>

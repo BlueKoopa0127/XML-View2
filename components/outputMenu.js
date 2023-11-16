@@ -15,7 +15,11 @@ export function OutputMenu() {
   );
 
   useEffect(() => {
-    setSelectedRelation(null);
+    if (selectedObject?.type == 'arrow') {
+      setSelectedRelation(selectedObject.literature[0]);
+    } else {
+      setSelectedRelation(null);
+    }
   }, [selectedObject]);
 
   if (selectedObject == null) {
