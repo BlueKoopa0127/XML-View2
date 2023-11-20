@@ -22,8 +22,6 @@ export function OutputMenu() {
     }
   }, [selectedObject]);
 
-  console.log(selectedObject?.literature);
-
   const title = (
     <Box
       style={{ border: '2px solid #333' }}

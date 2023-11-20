@@ -23,7 +23,7 @@ export default function Home({ Title }) {
         <Grid item xs={5}>
           <InputMenu />
         </Grid>
-        <Grid item xs={5}>
+        <Grid item xs={7}>
           <Typography variant="h1" align="center">
             {Title}
           </Typography>
@@ -41,6 +41,6 @@ export default function Home({ Title }) {
   );
 }
 export async function getStaticProps() {
-  const ahoy = 'たいとる';
+  const ahoy = 'XML-View';
   return { props: { Title: ahoy } };
 }
