@@ -6,6 +6,9 @@ import {
 } from 'recoil';
 import { drawDataState } from '../pages';
 import { selectedRelationState } from './outputMenu';
+import { useRef, useState, useEffect } from 'react';
+import * as d3 from 'd3';
+import { Button } from '@mui/material';
 
 export const selectedObjectState = atom({
   key: 'selectedObjectState',
@@ -15,47 +18,103 @@ export const selectedObjectState = atom({
 export function DrawChart() {
   const drawData = useRecoilValue(drawDataState);
   const setSelectedObject = useSetRecoilState(selectedObjectState);
+  const setSelectedRelation = useSetRecoilState(selectedRelationState);
   console.log(drawData);
   return (
-    <svg
-      viewBox={`0 0 800 800`}
-      style={{
-        backgroundColor: '#ddd',
-      }}
-    >
-      <marker
-        id="mu_mh"
-        markerUnits="strokeWidth"
-        markerWidth="5"
-        markerHeight="5"
-        viewBox="0 0 10 10"
-        refX="5"
-        refY="5"
-        orient={'auto'}
+    <>
+      <Button
+        variant="contained"
+        component="span"
+        onClick={() => {
+          setSelectedObject(null);
+          setSelectedRelation(null);
+        }}
       >
-        <polygon points="0,0 1,5 0,10 6,5 " fill="black" />
-      </marker>
-      {drawData.map((e, i) => {
-        if (e.type == 'text') {
-          return <DrawText key={e.id} e={e} />;
-        } else if (e.type == 'rounded') {
-          return <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />;
-        } else if (e.type == 'shape') {
-          return (
-            <g
-              key={e.id}
-              onClick={() => {
-                setSelectedObject(e);
-              }}
-              style={{ userSelect: 'none', cursor: 'pointer' }}
-            >
-              <DrawShape e={e} />
-            </g>
-          );
-        } else if (e.type == 'arrow') {
-          return <DrawArrow key={i} e={e} />;
-        }
-      })}
+        オブジェクト選択をリセット
+      </Button>
+      <Button variant="contained" component="span" id="resetButton">
+        位置をリセット
+      </Button>
+      <ZoomableSVG>
+        <svg
+          viewBox={`0 0 800 800`}
+          style={{
+            backgroundColor: '#ddd',
+          }}
+        >
+          <marker
+            id="mu_mh"
+            markerUnits="strokeWidth"
+            markerWidth="5"
+            markerHeight="5"
+            viewBox="0 0 10 10"
+            refX="5"
+            refY="5"
+            orient={'auto'}
+          >
+            <polygon points="0,0 1,5 0,10 6,5 " fill="black" />
+          </marker>
+          {drawData.map((e, i) => {
+            if (e.type == 'text') {
+              return <DrawText key={e.id} e={e} />;
+            } else if (e.type == 'rounded') {
+              return (
+                <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />
+              );
+            } else if (e.type == 'shape') {
+              return (
+                <g
+                  key={e.id}
+                  onClick={() => {
+                    setSelectedObject(e);
+                  }}
+                  style={{ userSelect: 'none', cursor: 'pointer' }}
+                >
+                  <DrawShape e={e} />
+                </g>
+              );
+            } else if (e.type == 'arrow') {
+              return <DrawArrow key={i} e={e} />;
+            }
+          })}
+        </svg>
+      </ZoomableSVG>
+    </>
+  );
+}
+
+function ZoomableSVG({ children, width, height }) {
+  const svgRef = useRef();
+  const [k, setK] = useState(1);
+  const [x, setX] = useState(0);
+  const [y, setY] = useState(0);
+  useEffect(() => {
+    const svgElement = d3.select(svgRef.current);
+    const initialTransform = d3.zoomIdentity;
+    const zoom = d3.zoom().on('zoom', (event) => {
+      const { x, y, k } = event.transform;
+      setK(k);
+      setX(x);
+      setY(y);
+    });
+    svgElement.call(zoom).call(zoom.transform, initialTransform);
+
+    const resetButton = d3.select('#resetButton');
+    resetButton.on('click', () => {
+      svgElement
+        .transition()
+        .duration(500)
+        .call(zoom.transform, initialTransform);
+    });
+  }, []);
+
+  return (
+    <svg
+      ref={svgRef}
+      viewBox="0 0 800 800"
+      style={{ cursor: 'grab', backgroundColor: 'gray' }}
+    >
+      <g transform={`translate(${x},${y})scale(${k})`}>{children}</g>
     </svg>
   );
 }
@@ -100,9 +159,6 @@ function DrawShape({ e }) {
   const attr = e.mxGeometry._attributes;
   const selectedObject = useRecoilValue(selectedObjectState);
   const selectedRelation = useRecoilValue(selectedRelationState);
-  const isRelation = selectedRelation
-    ? selectedRelation[0] == e.name || selectedRelation[1] == e.name
-    : false;
   const isSource = selectedRelation ? selectedRelation[0] == e.name : false;
   const isTarget = selectedRelation ? selectedRelation[1] == e.name : false;
   const color = isSource

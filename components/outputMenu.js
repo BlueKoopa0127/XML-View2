@@ -22,13 +22,36 @@ export function OutputMenu() {
     }
   }, [selectedObject]);
 
+  console.log(selectedObject?.literature);
+
+  const title = (
+    <Box
+      style={{ border: '2px solid #333' }}
+      p={1.5}
+      marginTop={3}
+      marginBottom={1.5}
+    >
+      {selectedObject == null
+        ? 'ノードやエッジをクリックしてください'
+        : '選択しているオブジェクト：'}
+      {selectedObject == null
+        ? ''
+        : selectedObject.name ??
+          (selectedObject?.literature.length == 0
+            ? 'データが存在していません'
+            : selectedObject?.literature[0][0] +
+              ' → ' +
+              selectedObject?.literature[0][1])}
+    </Box>
+  );
+
   if (selectedObject == null) {
-    return <div>ノードやエッジをクリックしてください</div>;
+    return <>{title}</>;
   }
 
   return (
     <div>
-      <div>結果</div>
+      {title}
       {selectedObject.literature.map((e, i) => {
         return (
           <div key={i}>
@@ -62,7 +85,9 @@ export function OutputMenu() {
       <Box p={1} style={{ border: '1px solid #555' }}>
         <Typography>
           説明文：
-          {selectedRelation == null ? '選択してくれ〜' : selectedRelation[2]}
+          {selectedRelation == null
+            ? '上の項目か右図の中の矢印をクリック'
+            : selectedRelation[2]}
         </Typography>
       </Box>
     </div>

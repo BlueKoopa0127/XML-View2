@@ -19,12 +19,18 @@ export default function Home({ Title }) {
   dataImport();
   return (
     <Container>
-      <Typography variant="h1" align="center">
-        {Title}
-      </Typography>
       <Grid container spacing={2}>
         <Grid item xs={5}>
           <InputMenu />
+        </Grid>
+        <Grid item xs={5}>
+          <Typography variant="h1" align="center">
+            {Title}
+          </Typography>
+        </Grid>
+      </Grid>
+      <Grid container spacing={2}>
+        <Grid item xs={5}>
           <OutputMenu />
         </Grid>
         <Grid item xs={7}>

@@ -7,7 +7,7 @@ import {
 } from 'recoil';
 import { xml2json } from 'xml-js';
 
-import { Input, Button, Card, Typography } from '@mui/material';
+import { Input, Button, Card, Typography, Link } from '@mui/material';
 import { drawDataState, relatedDataState } from '../pages';
 
 export const drawDataUrlState = atom({
@@ -70,7 +70,14 @@ export function InputMenu() {
               textOverflow: 'ellipsis',
             }}
           >
-            データのURL: {relatedDataUrl}
+            データのURL:
+            <Link
+              href={relatedDataUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {relatedDataUrl}
+            </Link>
           </Typography>
         </Card>
       </div>
