@@ -1,7 +1,8 @@
 import { useRecoilValue, useRecoilState, atom } from 'recoil';
 import { selectedObjectState } from './drawChart';
-import { Grid, Typography, Box } from '@mui/material';
-import { useEffect } from 'react';
+import { Grid, Typography, Box, Button } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { referencesDataState } from './inputManu';
 
 export const selectedRelationState = atom({
   key: 'selectedRelationState',
@@ -13,6 +14,15 @@ export function OutputMenu() {
   const [selectedRelation, setSelectedRelation] = useRecoilState(
     selectedRelationState,
   );
+  const referencesData = useRecoilValue(referencesDataState);
+
+  const [referenceData, setReferenceData] = useState(null);
+  useEffect(() => {
+    setReferenceData(
+      referencesData?.find((e) => e?.[0] == selectedRelation?.[2]),
+    );
+  }, [selectedRelation]);
+  console.log(referenceData);
 
   useEffect(() => {
     if (selectedObject?.type == 'arrow') {
@@ -80,13 +90,33 @@ export function OutputMenu() {
           </div>
         );
       })}
-      <Box p={1} style={{ border: '1px solid #555' }}>
+      <Box p={1} marginTop={1} style={{ border: '1px solid #555' }}>
         <Typography>
-          説明文：
+          Pointers on literature : <br />
           {selectedRelation == null
-            ? '上の項目か右図の中の矢印をクリック'
-            : selectedRelation[2]}
+            ? '上の項目か右図中の矢印をクリック'
+            : selectedRelation[3] == ''
+            ? 'データが存在していません'
+            : selectedRelation[3]}
         </Typography>
+      </Box>
+
+      <Box p={1} marginTop={1} style={{ border: '1px solid #555' }}>
+        <Button
+          variant="contained"
+          component="span"
+          onClick={async () => {
+            await navigator.clipboard.writeText(referenceData?.[2]);
+          }}
+          m={1}
+        >
+          Bibtexをコピーする
+        </Button>
+        {referencesData
+          ?.find((e) => e?.[0] == selectedRelation?.[2])?.[1]
+          ?.map((e, i) => {
+            return <Typography key={i}>{e}</Typography>;
+          })}
       </Box>
     </div>
   );

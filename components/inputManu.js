@@ -8,7 +8,6 @@ import {
 import { xml2json } from 'xml-js';
 
 import { Input, Button, Card, Typography, Link } from '@mui/material';
-import { filter } from 'd3';
 
 export const drawDataUrlState = atom({
   key: 'drawDataUrlState',
@@ -33,7 +32,7 @@ export const relatedDataState = atom({
 
 export const referencesDataState = atom({
   key: 'referencesDataState',
-  default: [],
+  default: null,
 });
 
 export function InputMenu() {
@@ -296,7 +295,20 @@ export function dataImport() {
     const filteredReferencesData = referencesDataAll.filter((e) => {
       return relatedData.map((f) => f[2]).includes(e[0]);
     });
-    setReferencesData(filteredReferencesData);
-    console.log(filteredReferencesData);
+    const br = filteredReferencesData.map((e) => {
+      return [
+        e[0],
+        e[1].split('\n').map((f) => {
+          return (
+            <>
+              {f}
+              <br />
+            </>
+          );
+        }),
+        e[1],
+      ];
+    });
+    setReferencesData(br);
   }, [referencesDataAll, relatedData]);
 }
