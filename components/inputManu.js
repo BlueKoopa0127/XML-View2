@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   useRecoilState,
   useRecoilValue,
@@ -8,7 +8,7 @@ import {
 import { xml2json } from 'xml-js';
 
 import { Input, Button, Card, Typography, Link } from '@mui/material';
-import { drawDataState, relatedDataState } from '../pages';
+import { filter } from 'd3';
 
 export const drawDataUrlState = atom({
   key: 'drawDataUrlState',
@@ -18,7 +18,22 @@ export const drawDataUrlState = atom({
 export const relatedDataUrlState = atom({
   key: 'relatedDataUrlState',
   default:
-    'https://script.googleusercontent.com/macros/echo?user_content_key=nd8R4gTB8cWnUxMh7wtmkwG_Tvf2v1OnzsL3415FrpqC35528jhS6BVOnm29dxk_F_KfEsPG9r7kRvtJfHi-Oc5Udodpl8L0m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnMcvwa9F95N400DZ4TmCuxfMiNlxraAC4kLmfCWiHTwpxI6af9-_YLu7nKW_RIEzYJL9Sn8v8UQx_AxJT9Z4uec1XCiqKzyYpA&lib=MQfS-BbL2BHguduB_Ix_KiE4IkG4fjIwP',
+    'https://script.googleusercontent.com/macros/echo?user_content_key=eZc5ZI_5uIjKgfMjH2_SPPMYv8cxFBIkWPUr_9ikfkgxhj6xeHMxsbhhkkxdnrGqqkBp81s-CMyKcTthGOMyNSb9b-CHg-7sm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnNn7QRqOoEBV3cKWTQSamdgSRZrrPeIyZwphpZ0GlGts72gFKSD-1bAtb3NGIwK2-kjPHDGPMaez-XMAlwbU29ealZQvKNBeidz9Jw9Md8uu&lib=MlymDeyPZhGLLMUX4XnL84AHWkD4xvv7U',
+});
+
+export const drawDataState = atom({
+  key: 'drawDataState',
+  default: [],
+});
+
+export const relatedDataState = atom({
+  key: 'relatedDataState',
+  default: [],
+});
+
+export const referencesDataState = atom({
+  key: 'referencesDataState',
+  default: [],
 });
 
 export function InputMenu() {
@@ -88,8 +103,12 @@ export function InputMenu() {
 export function dataImport() {
   const drawDataUrl = useRecoilValue(drawDataUrlState);
   const relatedDataUrl = useRecoilValue(relatedDataUrlState);
-  const setDrawData = useSetRecoilState(drawDataState);
+  const [drawData, setDrawData] = useRecoilState(drawDataState);
   const [relatedData, setRelatedData] = useRecoilState(relatedDataState);
+  const [referencesData, setReferencesData] =
+    useRecoilState(referencesDataState);
+  const [referencesDataAll, setReferencesDataAll] = useState([]);
+  const [relatedDataAll, setRelatedDataAll] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,7 +117,11 @@ export function dataImport() {
           ? drawDataUrl
           : window.URL.createObjectURL(drawDataUrl);
       const res = await fetch(url);
-      if (res.status == 200 && relatedData != null && relatedData.length > 0) {
+      if (
+        res.status == 200 &&
+        relatedDataAll != null &&
+        relatedDataAll.length > 0
+      ) {
         const text = await res.text();
         const drawData = JSON.parse(
           xml2json(text, { compact: true, spaces: 2 }),
@@ -181,9 +204,10 @@ export function dataImport() {
           .filter((e) => e.type == 'shape')
           .map((e) => e.text[0][1]);
         // console.log(nodeData);
-        const filteredRelatedData = relatedData.filter((e) => {
+        const filteredRelatedData = relatedDataAll.filter((e) => {
           return nodeData.includes(e[0]) && nodeData.includes(e[1]);
         });
+        setRelatedData(filteredRelatedData);
         // console.log(filteredRelatedData);
         const edgeFormatDrawData = formatDrawData.map((e) => {
           if (e.type == 'arrow') {
@@ -252,16 +276,27 @@ export function dataImport() {
       }
     };
     fetchData();
-  }, [drawDataUrl, relatedData]);
+  }, [drawDataUrl, relatedDataAll]);
 
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetch(relatedDataUrl);
       if (res.status == 200) {
         const text = await res.json();
-        setRelatedData(text);
+        setRelatedDataAll(text[0]);
+        setReferencesDataAll(text[1]);
       }
     };
     fetchData();
   }, [relatedDataUrl]);
+
+  useEffect(() => {
+    //console.log(referencesDataAll);
+    //console.log(relatedData);
+    const filteredReferencesData = referencesDataAll.filter((e) => {
+      return relatedData.map((f) => f[2]).includes(e[0]);
+    });
+    setReferencesData(filteredReferencesData);
+    console.log(filteredReferencesData);
+  }, [referencesDataAll, relatedData]);
 }

@@ -1,19 +1,8 @@
-import { useRecoilState, atom } from 'recoil';
 import { InputMenu, dataImport } from '../components/inputManu';
 import { DrawChart } from '../components/drawChart';
 import { OutputMenu } from '../components/outputMenu';
 import { Container } from '@mui/system';
 import { Grid, Typography } from '@mui/material';
-
-export const drawDataState = atom({
-  key: 'drawDataState',
-  default: [],
-});
-
-export const relatedDataState = atom({
-  key: 'relatedDataState',
-  default: [],
-});
 
 export default function Home({ Title }) {
   dataImport();
@@ -41,6 +30,6 @@ export default function Home({ Title }) {
   );
 }
 export async function getStaticProps() {
-  const ahoy = 'XML-View';
-  return { props: { Title: ahoy } };
+  const title = 'HCD-Image View';
+  return { props: { Title: title } };
 }

@@ -4,7 +4,7 @@ import {
   useSetRecoilState,
   atom,
 } from 'recoil';
-import { drawDataState } from '../pages';
+import { drawDataState } from './inputManu';
 import { selectedRelationState } from './outputMenu';
 import { useRef, useState, useEffect } from 'react';
 import * as d3 from 'd3';
