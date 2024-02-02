@@ -7,8 +7,8 @@ import { Grid, Typography } from '@mui/material';
 export default function Home({ Title }) {
   dataImport();
   return (
-    <Container>
-      <Grid container spacing={2}>
+    <Container maxWidth="xl">
+      <Grid container spacing={2} marginY={10}>
         <Grid item xs={5}>
           <InputMenu />
         </Grid>
@@ -19,10 +19,13 @@ export default function Home({ Title }) {
         </Grid>
       </Grid>
       <Grid container spacing={2}>
-        <Grid item xs={5}>
+        <Grid item xs={3}>
           <OutputMenu />
         </Grid>
-        <Grid item xs={7}>
+        <Grid item xs={4.5}>
+          <DrawChart />
+        </Grid>
+        <Grid item xs={4.5}>
           <DrawChart />
         </Grid>
       </Grid>
