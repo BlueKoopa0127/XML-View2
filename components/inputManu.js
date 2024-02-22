@@ -11,7 +11,7 @@ import { Input, Button, Card, Typography, Link } from '@mui/material';
 
 export const drawDataUrlState = atom({
   key: 'drawDataUrlState',
-  default: 'Miya_sample.drawio.xml',
+  default: 'Amygdala.circuit.drawio.xml',
 });
 
 export const relatedDataUrlState = atom({
@@ -194,6 +194,8 @@ export function dataImport() {
                 source: e._attributes.source,
                 target: e._attributes.target,
               };
+            } else {
+              return { ...e, type: 'null' };
             }
           })
           .filter((e) => {

@@ -27,6 +27,7 @@ export function OutputMenu() {
   useEffect(() => {
     if (selectedObject?.type == 'arrow') {
       setSelectedRelation(selectedObject.literature[0]);
+      console.log(selectedObject);
     } else {
       setSelectedRelation(null);
     }

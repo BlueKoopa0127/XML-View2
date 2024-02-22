@@ -37,7 +37,7 @@ export function DrawChart() {
       </Button>
       <ZoomableSVG>
         <svg
-          viewBox={`0 0 800 800`}
+          viewBox={`0 0 3600 3600`}
           style={{
             backgroundColor: '#ddd',
           }}
@@ -217,7 +217,7 @@ function DrawArrow({ e }) {
     : false;
   const sourcePointAttributes = e.source.mxGeometry._attributes;
   const targetPointAttributes = e.target.mxGeometry._attributes;
-  const r = (sourcePointAttributes.width * 1) / 2;
+  const r = (sourcePointAttributes.height * 1) / 2;
 
   const [sx, sy] = angle(
     (e.style.find((e) => e[0] == 'exitX') ?? ['', 0.5])[1] * 1,
