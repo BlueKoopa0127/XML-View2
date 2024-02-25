@@ -3,8 +3,12 @@ import { DrawChart } from '../components/drawChart';
 import { OutputMenu } from '../components/outputMenu';
 import { Container } from '@mui/system';
 import { Grid, Typography } from '@mui/material';
+import { drawDataState, rightDrawDataState } from '../components/inputManu';
+import { useRecoilValue } from 'recoil';
 
 export default function Home({ Title }) {
+  const drawData = useRecoilValue(drawDataState);
+  const rightDrawData = useRecoilValue(rightDrawDataState);
   dataImport();
   return (
     <Container maxWidth="xl">
@@ -23,10 +27,10 @@ export default function Home({ Title }) {
           <OutputMenu />
         </Grid>
         <Grid item xs={4.5}>
-          <DrawChart />
+          <DrawChart drawData={drawData} />
         </Grid>
         <Grid item xs={4.5}>
-          <DrawChart />
+          <DrawChart drawData={rightDrawData} />
         </Grid>
       </Grid>
     </Container>

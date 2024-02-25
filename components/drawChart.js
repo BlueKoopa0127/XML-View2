@@ -4,7 +4,6 @@ import {
   useSetRecoilState,
   atom,
 } from 'recoil';
-import { drawDataState } from './inputManu';
 import { selectedRelationState } from './outputMenu';
 import { useRef, useState, useEffect } from 'react';
 import * as d3 from 'd3';
@@ -15,8 +14,7 @@ export const selectedObjectState = atom({
   default: null,
 });
 
-export function DrawChart() {
-  const drawData = useRecoilValue(drawDataState);
+export function DrawChart({ drawData }) {
   const setSelectedObject = useSetRecoilState(selectedObjectState);
   const setSelectedRelation = useSetRecoilState(selectedRelationState);
   console.log(drawData);

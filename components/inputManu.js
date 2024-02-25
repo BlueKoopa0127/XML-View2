@@ -11,6 +11,11 @@ import { Input, Button, Card, Typography, Link } from '@mui/material';
 
 export const drawDataUrlState = atom({
   key: 'drawDataUrlState',
+  default: 'Miya_sample.drawio.xml',
+});
+
+export const rightDrawDataUrlState = atom({
+  key: 'rightDrawDataUrlState',
   default: 'Amygdala.circuit.drawio.xml',
 });
 
@@ -22,6 +27,11 @@ export const relatedDataUrlState = atom({
 
 export const drawDataState = atom({
   key: 'drawDataState',
+  default: [],
+});
+
+export const rightDrawDataState = atom({
+  key: 'rightDrawDataState',
   default: [],
 });
 
@@ -101,9 +111,14 @@ export function InputMenu() {
 
 export function dataImport() {
   const drawDataUrl = useRecoilValue(drawDataUrlState);
-  const relatedDataUrl = useRecoilValue(relatedDataUrlState);
   const [drawData, setDrawData] = useRecoilState(drawDataState);
+
+  const rightDrawDataUrl = useRecoilValue(rightDrawDataUrlState);
+  const [rightDrawData, setRightDrawData] = useRecoilState(rightDrawDataState);
+
+  const relatedDataUrl = useRecoilValue(relatedDataUrlState);
   const [relatedData, setRelatedData] = useRecoilState(relatedDataState);
+
   const [referencesData, setReferencesData] =
     useRecoilState(referencesDataState);
   const [referencesDataAll, setReferencesDataAll] = useState([]);
@@ -281,6 +296,15 @@ export function dataImport() {
 
   useEffect(() => {
     const fetchData = async () => {
+      const d = await url2json(rightDrawDataUrl);
+      setRightDrawData(d);
+      console.log(d);
+    };
+    fetchData();
+  }, [rightDrawDataUrl]);
+
+  useEffect(() => {
+    const fetchData = async () => {
       const res = await fetch(relatedDataUrl);
       if (res.status == 200) {
         const text = await res.json();
@@ -313,4 +337,131 @@ export function dataImport() {
     });
     setReferencesData(br);
   }, [referencesDataAll, relatedData]);
+}
+
+async function url2json(url) {
+  const stringUrl =
+    typeof url == 'string' ? url : window.URL.createObjectURL(url);
+  const res = await fetch(stringUrl);
+  if (res.status != 200) {
+    throw 'not 200';
+  }
+  const text = await res.text();
+  const drawData = JSON.parse(xml2json(text, { compact: true, spaces: 2 }))
+    .mxfile.diagram.mxGraphModel.root.mxCell;
+
+  const formatDrawData = drawData
+    .map((e) => {
+      //存在しない場合、空要素を返す
+      if (!('mxGeometry' in e)) {
+        return { ...e, type: 'null' };
+      }
+      //x座標がある場合
+      if ('x' in e.mxGeometry._attributes) {
+        const style = getStyle(e._attributes.style);
+
+        if (style[0][0] == 'text') {
+          //画像のないテキストオブジェクト
+          return {
+            id: e._attributes.id,
+            mxGeometry: e.mxGeometry,
+            type: 'text',
+            style: style,
+            text: translate(e._attributes.value),
+          };
+        } else {
+          if (style[0][0] == 'rounded') {
+            return {
+              id: e._attributes.id,
+              mxGeometry: e.mxGeometry,
+              type: 'rounded',
+              style: style,
+              text: translate(e._attributes.value),
+              shape: style[0][0],
+            };
+          } else {
+            // 画像のあるテキストオブジェクト
+            return {
+              id: e._attributes.id,
+              mxGeometry: e.mxGeometry,
+              type: 'shape',
+              style: style,
+              text: translate(e._attributes.value),
+              name: translate(e._attributes.value)[0][1],
+              shape: style[0][0],
+            };
+          }
+        }
+      } //x座標は無いけどsourceとtargetが存在する場合、矢印の描画
+      else if ('source' in e._attributes && 'target' in e._attributes) {
+        return {
+          id: e._attributes.id,
+          mxGeometry: e.mxGeometry,
+          type: 'arrow',
+          style: getStyle(e._attributes.style),
+          source: e._attributes.source,
+          target: e._attributes.target,
+        };
+      } else {
+        return { ...e, type: 'null' };
+      }
+    })
+    .filter((e) => {
+      return e.type != 'null';
+    })
+    .map((e, i, a) => {
+      if (e.type == 'arrow') {
+        return {
+          ...e,
+          source: a.find((f) => f.id == e.source),
+          target: a.find((f) => f.id == e.target),
+        };
+      } else {
+        return e;
+      }
+    })
+    .map((e, i, a) => {
+      if (e.type == 'shape') {
+        return {
+          ...e,
+          sourceNodes: a
+            .filter((f) => f.type == 'arrow')
+            .map((f) => {
+              if (f.target.id == e.id) {
+                return f.source;
+              }
+              return null;
+            })
+            .filter((f) => f != undefined),
+          targetNodes: a
+            .filter((f) => f.type == 'arrow')
+            .map((f) => {
+              if (f.source.id == e.id) {
+                return f.target;
+              }
+              return null;
+            })
+            .filter((f) => f != undefined),
+        };
+      } else {
+        return e;
+      }
+    });
+  return formatDrawData;
+}
+
+function getStyle(s) {
+  return s.split(';').map((a) => {
+    return a.split('=');
+  });
+}
+function translate(t) {
+  const result = t
+    .split('<')
+    .map((a) => {
+      return a.split('>');
+    })
+    .filter((a) => a.indexOf('') == -1);
+  //console.log(result)
+  return result;
 }
