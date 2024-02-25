@@ -132,164 +132,48 @@ export function dataImport() {
           : window.URL.createObjectURL(drawDataUrl);
       const res = await fetch(url);
       if (
-        res.status == 200 &&
-        relatedDataAll != null &&
-        relatedDataAll.length > 0
+        !(
+          res.status == 200 &&
+          relatedDataAll != null &&
+          relatedDataAll.length > 0
+        )
       ) {
-        const text = await res.text();
-        const drawData = JSON.parse(
-          xml2json(text, { compact: true, spaces: 2 }),
-        ).mxfile.diagram.mxGraphModel.root.mxCell;
-
-        function getStyle(s) {
-          return s.split(';').map((a) => {
-            return a.split('=');
-          });
-        }
-        function translate(t) {
-          const result = t
-            .split('<')
-            .map((a) => {
-              return a.split('>');
-            })
-            .filter((a) => a.indexOf('') == -1);
-          //console.log(result)
-          return result;
-        }
-
-        const formatDrawData = drawData
-          .map((e) => {
-            //存在しない場合、空要素を返す
-            if (!('mxGeometry' in e)) {
-              return { ...e, type: 'null' };
-            }
-            //x座標がある場合
-            if ('x' in e.mxGeometry._attributes) {
-              const style = getStyle(e._attributes.style);
-
-              if (style[0][0] == 'text') {
-                //画像のないテキストオブジェクト
-                return {
-                  id: e._attributes.id,
-                  mxGeometry: e.mxGeometry,
-                  type: 'text',
-                  style: style,
-                  text: translate(e._attributes.value),
-                };
-              } else {
-                if (style[0][0] == 'rounded') {
-                  return {
-                    id: e._attributes.id,
-                    mxGeometry: e.mxGeometry,
-                    type: 'rounded',
-                    style: style,
-                    text: translate(e._attributes.value),
-                    shape: style[0][0],
-                  };
-                } else {
-                  // 画像のあるテキストオブジェクト
-                  return {
-                    id: e._attributes.id,
-                    mxGeometry: e.mxGeometry,
-                    type: 'shape',
-                    style: style,
-                    text: translate(e._attributes.value),
-                    name: translate(e._attributes.value)[0][1],
-                    shape: style[0][0],
-                  };
-                }
-              }
-            } //x座標は無いけどsourceとtargetが存在する場合、矢印の描画
-            else if ('source' in e._attributes && 'target' in e._attributes) {
-              return {
-                id: e._attributes.id,
-                mxGeometry: e.mxGeometry,
-                type: 'arrow',
-                style: getStyle(e._attributes.style),
-                source: e._attributes.source,
-                target: e._attributes.target,
-              };
-            } else {
-              return { ...e, type: 'null' };
-            }
-          })
-          .filter((e) => {
-            return e.type != 'null';
-          });
-        const nodeData = formatDrawData
-          .filter((e) => e.type == 'shape')
-          .map((e) => e.text[0][1]);
-        // console.log(nodeData);
-        const filteredRelatedData = relatedDataAll.filter((e) => {
-          return nodeData.includes(e[0]) && nodeData.includes(e[1]);
-        });
-        setRelatedData(filteredRelatedData);
-        // console.log(filteredRelatedData);
-        const edgeFormatDrawData = formatDrawData.map((e) => {
-          if (e.type == 'arrow') {
-            return {
-              ...e,
-              source: formatDrawData.find((f) => f.id == e.source),
-              target: formatDrawData.find((f) => f.id == e.target),
-            };
-          } else {
-            return e;
-          }
-        });
-
-        const nodeFormatDrawData = edgeFormatDrawData.map((e) => {
-          if (e.type == 'shape') {
-            return {
-              ...e,
-              sourceNodes: edgeFormatDrawData
-                .filter((f) => f.type == 'arrow')
-                .map((f) => {
-                  if (f.target.id == e.id) {
-                    return f.source;
-                  }
-                  return null;
-                })
-                .filter((f) => f != undefined),
-              targetNodes: edgeFormatDrawData
-                .filter((f) => f.type == 'arrow')
-                .map((f) => {
-                  if (f.source.id == e.id) {
-                    return f.target;
-                  }
-                  return null;
-                })
-                .filter((f) => f != undefined),
-            };
-          } else {
-            return e;
-          }
-        });
-        const relatedFormatDrawData = nodeFormatDrawData.map((e) => {
-          if (e.type == 'shape') {
-            return {
-              ...e,
-              literature: filteredRelatedData.filter(
-                (f) =>
-                  (e.sourceNodes.map((g) => g.text[0][1]).includes(f[0]) &&
-                    f[1] == e.text[0][1]) ||
-                  (e.targetNodes.map((g) => g.text[0][1]).includes(f[1]) &&
-                    f[0] == e.text[0][1]),
-              ),
-            };
-          } else if (e.type == 'arrow') {
-            return {
-              ...e,
-              literature: filteredRelatedData.filter(
-                (f) =>
-                  f[0] == e.source.text[0][1] && f[1] == e.target.text[0][1],
-              ),
-            };
-          } else {
-            return e;
-          }
-        });
-        setDrawData(relatedFormatDrawData);
+        throw 'error';
       }
+      const drawData = await url2json(url);
+      const nodeData = drawData
+        .filter((e) => e.type == 'shape')
+        .map((e) => e.text[0][1]);
+
+      const filteredRelatedData = relatedDataAll.filter((e) => {
+        return nodeData.includes(e[0]) && nodeData.includes(e[1]);
+      });
+      setRelatedData(filteredRelatedData);
+
+      const relatedFormatDrawData = drawData.map((e) => {
+        if (e.type == 'shape') {
+          return {
+            ...e,
+            literature: filteredRelatedData.filter(
+              (f) =>
+                (e.sourceNodes.map((g) => g.text[0][1]).includes(f[0]) &&
+                  f[1] == e.text[0][1]) ||
+                (e.targetNodes.map((g) => g.text[0][1]).includes(f[1]) &&
+                  f[0] == e.text[0][1]),
+            ),
+          };
+        } else if (e.type == 'arrow') {
+          return {
+            ...e,
+            literature: filteredRelatedData.filter(
+              (f) => f[0] == e.source.text[0][1] && f[1] == e.target.text[0][1],
+            ),
+          };
+        } else {
+          return e;
+        }
+      });
+      setDrawData(relatedFormatDrawData);
     };
     fetchData();
   }, [drawDataUrl, relatedDataAll]);
@@ -298,7 +182,6 @@ export function dataImport() {
     const fetchData = async () => {
       const d = await url2json(rightDrawDataUrl);
       setRightDrawData(d);
-      console.log(d);
     };
     fetchData();
   }, [rightDrawDataUrl]);
@@ -347,8 +230,10 @@ async function url2json(url) {
     throw 'not 200';
   }
   const text = await res.text();
-  const drawData = JSON.parse(xml2json(text, { compact: true, spaces: 2 }))
-    .mxfile.diagram.mxGraphModel.root.mxCell;
+  const jsonData = JSON.parse(xml2json(text, { compact: true, spaces: 2 }));
+  const drawData = jsonData.mxfile.diagram.mxGraphModel.root.mxCell;
+
+  //console.log(drawData);
 
   const formatDrawData = drawData
     .map((e) => {

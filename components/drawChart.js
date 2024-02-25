@@ -35,7 +35,7 @@ export function DrawChart({ drawData }) {
       </Button>
       <ZoomableSVG>
         <svg
-          viewBox={`0 0 3600 3600`}
+          viewBox={`-500 -300 3600 3600`}
           style={{
             backgroundColor: '#ddd',
           }}
