@@ -22,7 +22,7 @@ export const rightDrawDataUrlState = atom({
 export const relatedDataUrlState = atom({
   key: 'relatedDataUrlState',
   default:
-    'https://script.googleusercontent.com/macros/echo?user_content_key=eZc5ZI_5uIjKgfMjH2_SPPMYv8cxFBIkWPUr_9ikfkgxhj6xeHMxsbhhkkxdnrGqqkBp81s-CMyKcTthGOMyNSb9b-CHg-7sm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnNn7QRqOoEBV3cKWTQSamdgSRZrrPeIyZwphpZ0GlGts72gFKSD-1bAtb3NGIwK2-kjPHDGPMaez-XMAlwbU29ealZQvKNBeidz9Jw9Md8uu&lib=MlymDeyPZhGLLMUX4XnL84AHWkD4xvv7U',
+    'https://script.googleusercontent.com/macros/echo?user_content_key=m93DUrnv50E-LSdbQqKbR3YC-DuUYdw2whqFPk0a-_MWaOw32ETwu6QBksanwadDqX4hrhcjdFvCkfUIeJIlC_YyIfFtlj7Qm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnO4U8AaCWv4-hT70SQmyTDCJEyXGdmRh75K4f-DKGjEpShpjlHg2cpbU8iYGNeUFOZoTVvnmM10b3nFytkSkJpy-UfPJnbVyDg&lib=M7Y24gl0mIsKDqTjOoU4Pzk4IkG4fjIwP',
 });
 
 export const drawDataState = atom({
@@ -42,6 +42,11 @@ export const relatedDataState = atom({
 
 export const referencesDataState = atom({
   key: 'referencesDataState',
+  default: null,
+});
+
+export const frgDataState = atom({
+  key: 'frgDataState',
   default: null,
 });
 
@@ -118,6 +123,7 @@ export function dataImport() {
 
   const relatedDataUrl = useRecoilValue(relatedDataUrlState);
   const [relatedData, setRelatedData] = useRecoilState(relatedDataState);
+  const [frgData, setFrgData] = useRecoilState(frgDataState);
 
   const [referencesData, setReferencesData] =
     useRecoilState(referencesDataState);
@@ -191,8 +197,9 @@ export function dataImport() {
       const res = await fetch(relatedDataUrl);
       if (res.status == 200) {
         const text = await res.json();
-        setRelatedDataAll(text[0]);
-        setReferencesDataAll(text[1]);
+        setRelatedDataAll(text['connections']);
+        setReferencesDataAll(text['references']);
+        setFrgData(text['frg']);
       }
     };
     fetchData();
@@ -255,7 +262,10 @@ async function url2json(url) {
             text: translate(e._attributes.value),
           };
         } else {
-          if (style[0][0] == 'rounded') {
+          if (
+            style[0][0] == 'rounded' &&
+            translate(e._attributes.value).length == 0
+          ) {
             return {
               id: e._attributes.id,
               mxGeometry: e.mxGeometry,

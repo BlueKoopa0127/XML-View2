@@ -22,12 +22,12 @@ export function OutputMenu() {
       referencesData?.find((e) => e?.[0] == selectedRelation?.[2]),
     );
   }, [selectedRelation]);
-  console.log(referenceData);
+  // console.log(referenceData);
 
   useEffect(() => {
+    console.log(selectedObject);
     if (selectedObject?.type == 'arrow') {
       setSelectedRelation(selectedObject.literature[0]);
-      console.log(selectedObject);
     } else {
       setSelectedRelation(null);
     }
@@ -46,7 +46,7 @@ export function OutputMenu() {
       {selectedObject == null
         ? ''
         : selectedObject.name ??
-          (selectedObject?.literature.length == 0
+          (selectedObject?.literature == undefined
             ? 'データが存在していません'
             : selectedObject?.literature[0][0] +
               ' → ' +

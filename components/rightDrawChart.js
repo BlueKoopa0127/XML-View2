@@ -8,16 +8,14 @@ import { selectedRelationState } from './outputMenu';
 import { useRef, useState, useEffect } from 'react';
 import * as d3 from 'd3';
 import { Button } from '@mui/material';
-import { selectedObjectStateR } from './rightDrawChart';
-import { frgDataState } from './inputManu';
 
-export const selectedObjectState = atom({
-  key: 'selectedObjectState',
+export const selectedObjectStateR = atom({
+  key: 'selectedObjectStateR',
   default: null,
 });
 
-export function DrawChart({ drawData }) {
-  const setSelectedObject = useSetRecoilState(selectedObjectState);
+export function RightDrawChart({ drawData }) {
+  const setSelectedObject = useSetRecoilState(selectedObjectStateR);
   const setSelectedRelation = useSetRecoilState(selectedRelationState);
   return (
     <>
@@ -31,7 +29,7 @@ export function DrawChart({ drawData }) {
       >
         オブジェクト選択をリセット
       </Button>
-      <Button variant="contained" component="span" id="resetButton">
+      <Button variant="contained" component="span" id="resetButton2">
         位置をリセット
       </Button>
       <ZoomableSVG>
@@ -98,7 +96,7 @@ function ZoomableSVG({ children, width, height }) {
     });
     svgElement.call(zoom).call(zoom.transform, initialTransform);
 
-    const resetButton = d3.select('#resetButton');
+    const resetButton = d3.select('#resetButton2');
     resetButton.on('click', () => {
       svgElement
         .transition()
@@ -158,19 +156,11 @@ function DrawText({ e }) {
 
 function DrawShape({ e }) {
   const attr = e.mxGeometry._attributes;
-  const selectedObject = useRecoilValue(selectedObjectState);
+  const selectedObject = useRecoilValue(selectedObjectStateR);
   const selectedRelation = useRecoilValue(selectedRelationState);
-  const selectedObjectR = useRecoilValue(selectedObjectStateR);
-  const frg = useRecoilValue(frgDataState);
   const isSource = selectedRelation ? selectedRelation[0] == e.name : false;
   const isTarget = selectedRelation ? selectedRelation[1] == e.name : false;
-  const isSelectedR = frg
-    .find((e) => e[0] == selectedObjectR?.text?.[0])?.[1]
-    .includes(e.name);
-
-  const color = isSelectedR
-    ? 'green'
-    : isSource
+  const color = isSource
     ? 'red'
     : isTarget
     ? 'blue'
@@ -220,7 +210,7 @@ function DrawShape({ e }) {
 
 function DrawArrow({ e }) {
   const [selectedObject, setSelectedObject] =
-    useRecoilState(selectedObjectState);
+    useRecoilState(selectedObjectStateR);
   const selectedRelation = useRecoilValue(selectedRelationState);
   const hightlightRelation = selectedRelation
     ? selectedRelation[0] == e.source.text[0][1] &&
