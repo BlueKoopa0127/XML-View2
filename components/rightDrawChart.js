@@ -8,6 +8,8 @@ import { selectedRelationState } from './outputMenu';
 import { useRef, useState, useEffect } from 'react';
 import * as d3 from 'd3';
 import { Button } from '@mui/material';
+import { frgDataState } from './inputManu';
+import { selectedObjectState } from './drawChart';
 
 export const selectedObjectStateR = atom({
   key: 'selectedObjectStateR',
@@ -17,6 +19,7 @@ export const selectedObjectStateR = atom({
 export function RightDrawChart({ drawData }) {
   const setSelectedObject = useSetRecoilState(selectedObjectStateR);
   const setSelectedRelation = useSetRecoilState(selectedRelationState);
+  console.log(drawData);
   return (
     <>
       <Button
@@ -34,7 +37,7 @@ export function RightDrawChart({ drawData }) {
       </Button>
       <ZoomableSVG>
         <svg
-          viewBox={`-500 -300 3600 3600`}
+          viewBox={`-800 -300 3600 3600`}
           style={{
             backgroundColor: '#ddd',
           }}
@@ -158,16 +161,45 @@ function DrawShape({ e }) {
   const attr = e.mxGeometry._attributes;
   const selectedObject = useRecoilValue(selectedObjectStateR);
   const selectedRelation = useRecoilValue(selectedRelationState);
+  const selectedObjectL = useRecoilValue(selectedObjectState);
+  const frg = useRecoilValue(frgDataState);
   const isSource = selectedRelation ? selectedRelation[0] == e.name : false;
   const isTarget = selectedRelation ? selectedRelation[1] == e.name : false;
-  const color = isSource
-    ? 'red'
-    : isTarget
-    ? 'blue'
-    : selectedObject == e
-    ? 'red'
-    : 'black';
+  const isSelectedR = frg
+    ?.filter((f) => f[1].includes(selectedObjectL?.name))
+    .map((f) => f[0])
+    .includes(e.text?.[0]?.[0]);
+  const color =
+    selectedObject == e
+      ? 'red'
+      : isSelectedR
+      ? 'green'
+      : isSource
+      ? 'red'
+      : isTarget
+      ? 'blue'
+      : 'black';
   //console.log(e);
+  const text = e?.text?.[0]?.[0].split('-');
+  const t = [];
+  let i = 1;
+  while (i < text?.length) {
+    const b = text[i - 1] + '-' + text[i];
+    if (b.length * 8 < attr.width) {
+      t.push(b);
+      i += 2;
+    } else if (i == text?.length - 1) {
+      t.push(text[i - 1] + '-');
+      t.push(text[i]);
+      i++;
+    } else {
+      t.push(text[i - 1] + '-');
+      i++;
+    }
+  }
+  if (t.length == 0) {
+    t.push(text?.[0]);
+  }
   return (
     <g key={e.id}>
       {e.shape == 'ellipse' ? (
@@ -184,11 +216,12 @@ function DrawShape({ e }) {
           y={attr.y}
           width={attr.width}
           height={attr.height}
-          fill="white"
+          fill={color == 'black' ? 'white' : color}
+          fillOpacity={color == 'black' ? 1 : 0.2}
           stroke={color}
         />
       )}
-      {e.text.map((a, index) => {
+      {t?.map((a, index) => {
         return (
           <text
             key={index}
@@ -200,7 +233,7 @@ function DrawShape({ e }) {
             fill={color}
             style={{ fill: 'black' }}
           >
-            {a[a.length - 1]}
+            {a}
           </text>
         );
       })}

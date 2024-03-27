@@ -16,13 +16,13 @@ export const drawDataUrlState = atom({
 
 export const rightDrawDataUrlState = atom({
   key: 'rightDrawDataUrlState',
-  default: 'Amygdala.circuit.drawio.xml',
+  default: 'Amygdala.circuit2.drawio.xml',
 });
 
 export const relatedDataUrlState = atom({
   key: 'relatedDataUrlState',
   default:
-    'https://script.googleusercontent.com/macros/echo?user_content_key=m93DUrnv50E-LSdbQqKbR3YC-DuUYdw2whqFPk0a-_MWaOw32ETwu6QBksanwadDqX4hrhcjdFvCkfUIeJIlC_YyIfFtlj7Qm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnO4U8AaCWv4-hT70SQmyTDCJEyXGdmRh75K4f-DKGjEpShpjlHg2cpbU8iYGNeUFOZoTVvnmM10b3nFytkSkJpy-UfPJnbVyDg&lib=M7Y24gl0mIsKDqTjOoU4Pzk4IkG4fjIwP',
+    'https://script.googleusercontent.com/macros/echo?user_content_key=wZFUnEmoO7K7s6J0kF76ByqNaR-gh6tCDVMyCByo-KxoSrCoGJ0em6IobfLWuXfaiTAApITNxOO_jjLNOuG7_Y_HhFvAlTHGm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnO4U8AaCWv4-hT70SQmyTDCJEyXGdmRh75K4f-DKGjEpShpjlHg2cpbU8iYGNeUFOZoTVvnmM10b3nFytkSkJpy-UfPJnbVyDg&lib=M7Y24gl0mIsKDqTjOoU4Pzk4IkG4fjIwP',
 });
 
 export const drawDataState = atom({

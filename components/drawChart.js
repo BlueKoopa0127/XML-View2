@@ -165,18 +165,19 @@ function DrawShape({ e }) {
   const isSource = selectedRelation ? selectedRelation[0] == e.name : false;
   const isTarget = selectedRelation ? selectedRelation[1] == e.name : false;
   const isSelectedR = frg
-    .find((e) => e[0] == selectedObjectR?.text?.[0])?.[1]
+    .find((f) => f[0] == selectedObjectR?.text?.[0])?.[1]
     .includes(e.name);
 
-  const color = isSelectedR
-    ? 'green'
-    : isSource
-    ? 'red'
-    : isTarget
-    ? 'blue'
-    : selectedObject == e
-    ? 'red'
-    : 'black';
+  const color =
+    selectedObject == e
+      ? 'red'
+      : isSelectedR
+      ? 'green'
+      : isSource
+      ? 'red'
+      : isTarget
+      ? 'blue'
+      : 'black';
   //console.log(e);
   return (
     <g key={e.id}>
@@ -185,7 +186,8 @@ function DrawShape({ e }) {
           cx={attr.x * 1 + attr.width / 2}
           cy={attr.y * 1 + attr.height / 2}
           r={40}
-          fill="white"
+          fill={color == 'black' ? 'white' : color}
+          fillOpacity={color == 'black' ? 1 : 0.2}
           stroke={color}
         />
       ) : (
