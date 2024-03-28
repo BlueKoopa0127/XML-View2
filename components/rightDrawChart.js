@@ -19,6 +19,10 @@ export const selectedObjectStateR = atom({
 export function RightDrawChart({ drawData }) {
   const setSelectedObject = useSetRecoilState(selectedObjectStateR);
   const setSelectedRelation = useSetRecoilState(selectedRelationState);
+  const textData = drawData.filter((e) => e.type == 'text');
+  const groupData = drawData.filter((e) => e.type == 'rounded');
+  const nodeData = drawData.filter((e) => e.type == 'shape');
+  const edgeData = drawData.filter((e) => e.type == 'arrow');
   console.log(drawData);
   return (
     <>
@@ -54,28 +58,30 @@ export function RightDrawChart({ drawData }) {
           >
             <polygon points="0,0 1,5 0,10 6,5 " fill="black" />
           </marker>
-          {drawData.map((e, i) => {
-            if (e.type == 'text') {
-              return <DrawText key={e.id} e={e} />;
-            } else if (e.type == 'rounded') {
-              return (
-                <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />
-              );
-            } else if (e.type == 'shape') {
-              return (
-                <g
-                  key={e.id}
-                  onClick={() => {
-                    setSelectedObject(e);
-                  }}
-                  style={{ userSelect: 'none', cursor: 'pointer' }}
-                >
-                  <DrawShape e={e} />
-                </g>
-              );
-            } else if (e.type == 'arrow') {
-              return <DrawArrow key={i} e={e} />;
-            }
+          {textData.map((e, i) => {
+            return <DrawText key={e.id} e={e} />;
+          })}
+          {groupData.map((e, i) => {
+            return (
+              <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />
+            );
+          })}
+
+          {edgeData.map((e, i) => {
+            return <DrawArrow key={i} e={e} />;
+          })}
+          {nodeData.map((e, i) => {
+            return (
+              <g
+                key={e.id}
+                onClick={() => {
+                  setSelectedObject(e);
+                }}
+                style={{ userSelect: 'none', cursor: 'pointer' }}
+              >
+                <DrawShape e={e} />
+              </g>
+            );
           })}
         </svg>
       </ZoomableSVG>
