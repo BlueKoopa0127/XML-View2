@@ -52,24 +52,52 @@ export const frgDataState = atom({
 
 export function InputMenu() {
   const [drawDataUrl, setDrawDataUrl] = useRecoilState(drawDataUrlState);
+  const [rightDrawDataUrl, setRightDrawDataUrl] = useRecoilState(
+    rightDrawDataUrlState,
+  );
   const [relatedDataUrl, setRelatedDataUrl] =
     useRecoilState(relatedDataUrlState);
   return (
     <>
       <div>
-        <Input
-          accept="*.xml"
-          style={{ display: 'none' }}
-          id="file-input"
-          type="file"
-          onChange={(e) => setDrawDataUrl(e.target.files[0])}
-        />
-        <label htmlFor="file-input">
-          <Button variant="contained" component="span">
-            ファイルを選択
-          </Button>
-        </label>
-        {drawDataUrl && <p>選択されたファイル名: {drawDataUrl.name}</p>}
+        <div>
+          <Input
+            accept="*.xml"
+            style={{ display: 'none' }}
+            id="drawDataUrl"
+            type="file"
+            onChange={(e) => setDrawDataUrl(e.target.files[0])}
+          />
+          <label htmlFor="drawDataUrl">
+            <Button variant="contained" component="span">
+              ファイルを選択
+            </Button>
+          </label>
+          {drawDataUrl && (
+            <p>BRA Imageのxmlファイル名: {drawDataUrl.name ?? drawDataUrl}</p>
+          )}
+        </div>
+
+        <div>
+          <Input
+            accept="*.xml"
+            style={{ display: 'none' }}
+            id="rightDrawDataUrl"
+            type="file"
+            onChange={(e) => setRightDrawDataUrl(e.target.files[0])}
+          />
+          <label htmlFor="rightDrawDataUrl">
+            <Button variant="contained" component="span">
+              ファイルを選択
+            </Button>
+          </label>
+          {rightDrawDataUrl && (
+            <p>
+              要件実現グラフのxmlファイル名:{' '}
+              {rightDrawDataUrl.name ?? rightDrawDataUrl}
+            </p>
+          )}
+        </div>
       </div>
       <div>
         <Card variant="outlined">
@@ -185,6 +213,7 @@ export function dataImport() {
   }, [drawDataUrl, relatedDataAll]);
 
   useEffect(() => {
+    console.log(rightDrawDataUrl);
     const fetchData = async () => {
       const d = await url2json(rightDrawDataUrl);
       setRightDrawData(d);
