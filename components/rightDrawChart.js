@@ -23,7 +23,10 @@ export function RightDrawChart({ drawData }) {
   const groupData = drawData.filter((e) => e.type == 'rounded');
   const nodeData = drawData.filter((e) => e.type == 'shape');
   const edgeData = drawData.filter((e) => e.type == 'arrow');
-  console.log(drawData);
+  //console.log(drawData);
+  const sizeX = d3.extent(drawData.map((e) => e.mxGeometry._attributes.x * 1));
+  const sizeY = d3.extent(drawData.map((e) => e.mxGeometry._attributes.y * 1));
+  const margin = 200;
   return (
     <>
       <Button
@@ -41,7 +44,9 @@ export function RightDrawChart({ drawData }) {
       </Button>
       <ZoomableSVG>
         <svg
-          viewBox={`-800 -300 3600 3600`}
+          viewBox={`${sizeX[0]} ${sizeY[0]} ${sizeX[1] - sizeX[0] + margin} ${
+            sizeY[1] - sizeY[0] + margin
+          }`}
           style={{
             backgroundColor: '#ddd',
           }}

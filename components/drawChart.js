@@ -19,6 +19,9 @@ export const selectedObjectState = atom({
 export function DrawChart({ drawData }) {
   const setSelectedObject = useSetRecoilState(selectedObjectState);
   const setSelectedRelation = useSetRecoilState(selectedRelationState);
+  const sizeX = d3.extent(drawData.map((e) => e.mxGeometry._attributes.x * 1));
+  const sizeY = d3.extent(drawData.map((e) => e.mxGeometry._attributes.y * 1));
+  const margin = 200;
   return (
     <>
       <Button
@@ -36,7 +39,9 @@ export function DrawChart({ drawData }) {
       </Button>
       <ZoomableSVG>
         <svg
-          viewBox={`-500 -300 3600 3600`}
+          viewBox={`${sizeX[0]} ${sizeY[0]} ${sizeX[1] - sizeX[0] + margin} ${
+            sizeY[1] - sizeY[0] + margin
+          }`}
           style={{
             backgroundColor: '#ddd',
           }}
