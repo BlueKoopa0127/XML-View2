@@ -187,23 +187,43 @@ function DrawShape({ e }) {
   return (
     <g key={e.id}>
       {e.shape == 'ellipse' ? (
-        <circle
-          cx={attr.x * 1 + attr.width / 2}
-          cy={attr.y * 1 + attr.height / 2}
-          r={40}
-          fill={color == 'black' ? 'white' : color}
-          fillOpacity={color == 'black' ? 1 : 0.2}
-          stroke={color}
-        />
+        <g>
+          <circle
+            cx={attr.x * 1 + attr.width / 2}
+            cy={attr.y * 1 + attr.height / 2}
+            r={40}
+            fill={'white'}
+            stroke={color}
+          />
+          <circle
+            cx={attr.x * 1 + attr.width / 2}
+            cy={attr.y * 1 + attr.height / 2}
+            r={40}
+            fill={color == 'black' ? 'white' : color}
+            fillOpacity={color == 'black' ? 1 : 0.2}
+            stroke={color}
+          />
+        </g>
       ) : (
-        <rect
-          x={attr.x}
-          y={attr.y}
-          width={attr.width}
-          height={attr.height}
-          fill="white"
-          stroke={color}
-        />
+        <g>
+          <rect
+            x={attr.x}
+            y={attr.y}
+            width={attr.width}
+            height={attr.height}
+            fill={'white'}
+            stroke={color}
+          />
+          <rect
+            x={attr.x}
+            y={attr.y}
+            width={attr.width}
+            height={attr.height}
+            fill={color == 'black' ? 'white' : color}
+            fillOpacity={color == 'black' ? 1 : 0.2}
+            stroke={color}
+          />
+        </g>
       )}
       {e.text.map((a, index) => {
         return (

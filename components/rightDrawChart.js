@@ -63,13 +63,14 @@ export function RightDrawChart({ drawData }) {
           >
             <polygon points="0,0 1,5 0,10 6,5 " fill="black" />
           </marker>
-          {textData.map((e, i) => {
-            return <DrawText key={e.id} e={e} />;
-          })}
+
           {groupData.map((e, i) => {
             return (
               <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />
             );
+          })}
+          {textData.map((e, i) => {
+            return <DrawText key={e.id} e={e} />;
           })}
 
           {edgeData.map((e, i) => {
@@ -214,23 +215,43 @@ function DrawShape({ e }) {
   return (
     <g key={e.id}>
       {e.shape == 'ellipse' ? (
-        <circle
-          cx={attr.x * 1 + attr.width / 2}
-          cy={attr.y * 1 + attr.height / 2}
-          r={40}
-          fill="white"
-          stroke={color}
-        />
+        <g>
+          <circle
+            cx={attr.x * 1 + attr.width / 2}
+            cy={attr.y * 1 + attr.height / 2}
+            r={40}
+            fill={'white'}
+            stroke={color}
+          />
+          <circle
+            cx={attr.x * 1 + attr.width / 2}
+            cy={attr.y * 1 + attr.height / 2}
+            r={40}
+            fill={color == 'black' ? 'white' : color}
+            fillOpacity={color == 'black' ? 1 : 0.2}
+            stroke={color}
+          />
+        </g>
       ) : (
-        <rect
-          x={attr.x}
-          y={attr.y}
-          width={attr.width}
-          height={attr.height}
-          fill={color == 'black' ? 'white' : color}
-          fillOpacity={color == 'black' ? 1 : 0.2}
-          stroke={color}
-        />
+        <g>
+          <rect
+            x={attr.x}
+            y={attr.y}
+            width={attr.width}
+            height={attr.height}
+            fill={'white'}
+            stroke={color}
+          />
+          <rect
+            x={attr.x}
+            y={attr.y}
+            width={attr.width}
+            height={attr.height}
+            fill={color == 'black' ? 'white' : color}
+            fillOpacity={color == 'black' ? 1 : 0.2}
+            stroke={color}
+          />
+        </g>
       )}
       {t?.map((a, index) => {
         return (
@@ -241,7 +262,6 @@ function DrawShape({ e }) {
             width={attr.width}
             height={attr.height}
             textAnchor="middle"
-            fill={color}
             style={{ fill: 'black' }}
           >
             {a}
