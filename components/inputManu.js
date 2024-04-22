@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  useRecoilState,
-  useRecoilValue,
-  useSetRecoilState,
-  atom,
-} from 'recoil';
+import { useRecoilState, useRecoilValue, atom } from 'recoil';
 import { xml2json } from 'xml-js';
 
 import { Input, Button, Card, Typography, Link } from '@mui/material';
@@ -177,7 +172,7 @@ export function dataImport() {
       const drawData = await url2json(url);
       const nodeData = drawData
         .filter((e) => e.type == 'shape')
-        .map((e) => e.text[0][1]);
+        .map((e) => e.text);
 
       const filteredRelatedData = relatedDataAll.filter((e) => {
         return nodeData.includes(e[0]) && nodeData.includes(e[1]);
@@ -190,17 +185,17 @@ export function dataImport() {
             ...e,
             literature: filteredRelatedData.filter(
               (f) =>
-                (e.sourceNodes.map((g) => g.text[0][1]).includes(f[0]) &&
-                  f[1] == e.text[0][1]) ||
-                (e.targetNodes.map((g) => g.text[0][1]).includes(f[1]) &&
-                  f[0] == e.text[0][1]),
+                (e.sourceNodes.map((g) => g.text).includes(f[0]) &&
+                  f[1] == e.text) ||
+                (e.targetNodes.map((g) => g.text).includes(f[1]) &&
+                  f[0] == e.text),
             ),
           };
         } else if (e.type == 'arrow') {
           return {
             ...e,
             literature: filteredRelatedData.filter(
-              (f) => f[0] == e.source.text[0][1] && f[1] == e.target.text[0][1],
+              (f) => f[0] == e.source.text && f[1] == e.target.text,
             ),
           };
         } else {
@@ -278,8 +273,12 @@ async function url2json(url) {
         return { ...e, type: 'null' };
       }
       //x座標がある場合
-      if ('x' in e.mxGeometry._attributes) {
+      if (
+        ('value' in e._attributes && e._attributes.value != '') ||
+        'x' in e.mxGeometry._attributes
+      ) {
         const style = getStyle(e._attributes.style);
+        const text = translate(e._attributes.value);
 
         if (style[0][0] == 'text') {
           //画像のないテキストオブジェクト
@@ -288,30 +287,32 @@ async function url2json(url) {
             mxGeometry: e.mxGeometry,
             type: 'text',
             style: style,
-            text: translate(e._attributes.value),
+            text: text[0][text[0].length - 1],
           };
         } else {
-          if (
-            style[0][0] == 'rounded' &&
-            translate(e._attributes.value).length == 0
-          ) {
+          if (style[0][0] == 'rounded' && text.length == 0) {
             return {
               id: e._attributes.id,
               mxGeometry: e.mxGeometry,
               type: 'rounded',
               style: style,
-              text: translate(e._attributes.value),
+              text: text,
               shape: style[0][0],
             };
           } else {
             // 画像のあるテキストオブジェクト
+            if (!('x' in e.mxGeometry._attributes)) {
+              e.mxGeometry._attributes.x = '0';
+            }
+            if (!('y' in e.mxGeometry._attributes)) {
+              e.mxGeometry._attributes.y = '0';
+            }
             return {
               id: e._attributes.id,
               mxGeometry: e.mxGeometry,
               type: 'shape',
               style: style,
-              text: translate(e._attributes.value),
-              name: translate(e._attributes.value)[0][1],
+              text: text[0][text[0].length - 1],
               shape: style[0][0],
             };
           }
@@ -371,6 +372,7 @@ async function url2json(url) {
         return e;
       }
     });
+  console.log(formatDrawData);
   return formatDrawData;
 }
 
@@ -386,6 +388,5 @@ function translate(t) {
       return a.split('>');
     })
     .filter((a) => a.indexOf('') == -1);
-  //console.log(result)
   return result;
 }

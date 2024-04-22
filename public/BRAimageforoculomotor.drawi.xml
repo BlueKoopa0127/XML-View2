@@ -1,0 +1,85 @@
+<mxfile host="app.diagrams.net" modified="2024-04-20T08:14:40.629Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36" etag="lyY4gTN6VagKcVyJKysG" version="24.2.7" type="device">
+  <diagram name="ページ1" id="U8VnwV4sXCw9EdTT86Bb">
+    <mxGraphModel dx="2326" dy="1862" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" value="R.Calculate-AmountOfCorrection:&lt;span style=&quot;background-color: initial;&quot;&gt;With the head fixed, to move the Eye balls to compensate for the visual slip by moving the target.&lt;/span&gt;&lt;div&gt;&lt;span id=&quot;docs-internal-guid-215cac4d-7fff-1c08-bc15-7f923c7b46c5&quot;&gt;&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-150" y="165" width="180" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="3" value="R.CodeDiscrepancyBetween&lt;div&gt;Eyeball-AndTarget&lt;div&gt;U.cSCI&lt;/div&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;container=0;shape=ellipse;perimeter=ellipsePerimeter;" parent="1" vertex="1">
+          <mxGeometry x="-413" y="980" width="200" height="62.86" as="geometry" />
+        </mxCell>
+        <mxCell id="4" value="R.ExecuteEye-Movement" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-480" y="333.32" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="5" value="R.Calculate-AmoutOf&lt;br&gt;Correction" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-180" y="327.14" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="6" value="R.PredictTargetMovement" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="190" y="333.31999999999994" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="7" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" parent="1" source="2" target="4" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-211" y="470" as="sourcePoint" />
+            <mxPoint x="-240" y="535" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="8" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" target="5" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-62" y="255" as="sourcePoint" />
+            <mxPoint x="60" y="525" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="9" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="2" target="6" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-52" y="265" as="sourcePoint" />
+            <mxPoint x="-76" y="328" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="10" value="R.DetectChangeIn&lt;br&gt;Target-Position" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-370" y="561.4300000000001" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="11" value="R.DetectVisualSlip" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-320" y="437.14" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="12" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="11" target="10" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-121" y="560" as="sourcePoint" />
+            <mxPoint x="-260" y="678" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="13" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="5" target="11" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-30" y="406.18" as="sourcePoint" />
+            <mxPoint x="-23" y="434.18" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="14" value="R.Calculate-Discrepancy&lt;br&gt;Eyeball-AndTarget" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="-160" y="437.14" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="15" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="5" target="14" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-132" y="410" as="sourcePoint" />
+            <mxPoint x="-175" y="447" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="16" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="10" target="3" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-204" y="510" as="sourcePoint" />
+            <mxPoint x="-260" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="17" value="R.Calculate-Eyeball-s-Position" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="18" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="5" target="17" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="-85" y="410" as="sourcePoint" />
+            <mxPoint x="-79" y="447" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

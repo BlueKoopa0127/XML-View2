@@ -4,7 +4,6 @@ import { OutputMenu } from '../components/outputMenu';
 import { Container } from '@mui/system';
 import { Grid, Typography } from '@mui/material';
 import { drawDataState, rightDrawDataState } from '../components/inputManu';
-import { RightDrawChart } from '../components/rightDrawChart';
 import { useRecoilValue } from 'recoil';
 
 export default function Home({ Title }) {
@@ -28,10 +27,10 @@ export default function Home({ Title }) {
           <OutputMenu />
         </Grid>
         <Grid item xs={4.5}>
-          <DrawChart drawData={drawData} />
+          <DrawChart drawData={drawData} isBRA={true} />
         </Grid>
         <Grid item xs={4.5}>
-          <RightDrawChart drawData={rightDrawData} />
+          <DrawChart drawData={rightDrawData} isBRA={false} />
         </Grid>
       </Grid>
     </Container>

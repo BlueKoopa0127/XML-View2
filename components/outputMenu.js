@@ -1,5 +1,5 @@
 import { useRecoilValue, useRecoilState, atom } from 'recoil';
-import { selectedObjectState } from './drawChart';
+import { selectedObjectStateL } from './drawChart';
 import { Grid, Typography, Box, Button } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { referencesDataState } from './inputManu';
@@ -8,9 +8,8 @@ export const selectedRelationState = atom({
   key: 'selectedRelationState',
   default: null,
 });
-
 export function OutputMenu() {
-  const selectedObject = useRecoilValue(selectedObjectState);
+  const selectedObject = useRecoilValue(selectedObjectStateL);
   const [selectedRelation, setSelectedRelation] = useRecoilState(
     selectedRelationState,
   );
@@ -25,7 +24,6 @@ export function OutputMenu() {
   // console.log(referenceData);
 
   useEffect(() => {
-    console.log(selectedObject);
     if (selectedObject?.type == 'arrow') {
       setSelectedRelation(selectedObject.literature[0]);
     } else {
@@ -45,14 +43,14 @@ export function OutputMenu() {
         : '選択しているオブジェクト：'}
       {selectedObject == null
         ? ''
-        : selectedObject.name ??
-          (selectedObject?.literature == undefined
-            ? 'データが存在していません'
-            : selectedObject?.literature[0][0] +
-              ' → ' +
-              selectedObject?.literature[0][1])}
+        : selectedObject?.literature?.length == 0
+        ? 'データが存在していません'
+        : selectedObject?.literature[0][0] +
+          ' → ' +
+          selectedObject?.literature[0][1]}
     </Box>
   );
+  console.log(selectedObject);
 
   if (selectedObject == null) {
     return <>{title}</>;

@@ -1,27 +1,51 @@
-import {
-  useRecoilValue,
-  useRecoilState,
-  useSetRecoilState,
-  atom,
-} from 'recoil';
+import { useRecoilValue, useRecoilState, atom } from 'recoil';
 import { selectedRelationState } from './outputMenu';
 import { useRef, useState, useEffect } from 'react';
 import * as d3 from 'd3';
 import { Button } from '@mui/material';
-import { selectedObjectStateR } from './rightDrawChart';
 import { frgDataState } from './inputManu';
 
-export const selectedObjectState = atom({
-  key: 'selectedObjectState',
+export const selectedObjectStateL = atom({
+  key: 'selectedObjectStateL',
+  default: null,
+});
+export const selectedObjectStateR = atom({
+  key: 'selectedObjectStateR',
   default: null,
 });
 
-export function DrawChart({ drawData }) {
-  const setSelectedObject = useSetRecoilState(selectedObjectState);
-  const setSelectedRelation = useSetRecoilState(selectedRelationState);
+export function DrawChart({ drawData, isBRA }) {
+  const [selectedObjectL, setSelectedObjectL] =
+    useRecoilState(selectedObjectStateL);
+  const [selectedRelation, setSelectedRelation] = useRecoilState(
+    selectedRelationState,
+  );
+  const [selectedObjectR, setSelectedObjectR] =
+    useRecoilState(selectedObjectStateR);
+
+  const frg = useRecoilValue(frgDataState);
+
+  const setSelectedObject = isBRA ? setSelectedObjectL : setSelectedObjectR;
   const sizeX = d3.extent(drawData.map((e) => e.mxGeometry._attributes.x * 1));
   const sizeY = d3.extent(drawData.map((e) => e.mxGeometry._attributes.y * 1));
   const margin = 200;
+  const textData = drawData.filter((e) => e.type == 'text');
+  const groupData = drawData.filter((e) => e.type == 'rounded');
+  const nodeData = drawData.filter((e) => e.type == 'shape');
+  const edgeData = drawData.filter((e) => e.type == 'arrow');
+  function SelectableObject({ children, e }) {
+    return (
+      <g
+        key={e.id}
+        onClick={() => {
+          setSelectedObject(e);
+        }}
+        style={{ userSelect: 'none', cursor: 'pointer' }}
+      >
+        {children}
+      </g>
+    );
+  }
   return (
     <>
       <Button
@@ -34,6 +58,7 @@ export function DrawChart({ drawData }) {
       >
         オブジェクト選択をリセット
       </Button>
+      {/* resetButtonのidを差別化 */}
       <Button variant="contained" component="span" id="resetButton">
         位置をリセット
       </Button>
@@ -47,7 +72,7 @@ export function DrawChart({ drawData }) {
           }}
         >
           <marker
-            id="mu_mh"
+            id="black"
             markerUnits="strokeWidth"
             markerWidth="5"
             markerHeight="5"
@@ -58,28 +83,53 @@ export function DrawChart({ drawData }) {
           >
             <polygon points="0,0 1,5 0,10 6,5 " fill="black" />
           </marker>
-          {drawData.map((e, i) => {
-            if (e.type == 'text') {
-              return <DrawText key={e.id} e={e} />;
-            } else if (e.type == 'rounded') {
-              return (
-                <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />
-              );
-            } else if (e.type == 'shape') {
-              return (
-                <g
-                  key={e.id}
-                  onClick={() => {
-                    setSelectedObject(e);
-                  }}
-                  style={{ userSelect: 'none', cursor: 'pointer' }}
-                >
-                  <DrawShape e={e} />
-                </g>
-              );
-            } else if (e.type == 'arrow') {
-              return <DrawArrow key={i} e={e} />;
-            }
+          <marker
+            id="red"
+            markerUnits="strokeWidth"
+            markerWidth="5"
+            markerHeight="5"
+            viewBox="0 0 10 10"
+            refX="5"
+            refY="5"
+            orient={'auto'}
+          >
+            <polygon points="0,0 1,5 0,10 6,5 " fill="red" />
+          </marker>
+          {groupData.map((e, i) => {
+            return (
+              <DrawShape key={e.id} e={e} style={{ userSelect: 'none' }} />
+            );
+          })}
+          {textData.map((e, i) => {
+            return <DrawText key={e.id} e={e} />;
+          })}
+
+          {edgeData.map((e, i) => {
+            return (
+              <SelectableObject key={e.id} e={e}>
+                <DrawArrow
+                  e={e}
+                  isBRA={isBRA}
+                  selectedObjectL={selectedObjectL}
+                  selectedObjectR={selectedObjectR}
+                  selectedRelation={selectedRelation}
+                />
+              </SelectableObject>
+            );
+          })}
+          {nodeData.map((e, i) => {
+            return (
+              <SelectableObject key={e.id} e={e}>
+                <DrawShape
+                  e={e}
+                  isBRA={isBRA}
+                  selectedObjectL={selectedObjectL}
+                  selectedObjectR={selectedObjectR}
+                  selectedRelation={selectedRelation}
+                  frg={frg}
+                />
+              </SelectableObject>
+            );
           })}
         </svg>
       </ZoomableSVG>
@@ -103,6 +153,7 @@ function ZoomableSVG({ children, width, height }) {
     });
     svgElement.call(zoom).call(zoom.transform, initialTransform);
 
+    // idの差別化
     const resetButton = d3.select('#resetButton');
     resetButton.on('click', () => {
       svgElement
@@ -123,6 +174,7 @@ function ZoomableSVG({ children, width, height }) {
   );
 }
 
+//変更の必要があるかも、長方形に対して
 function angle(x, y, r) {
   if (x == 0.5 && y == 0.5) {
     return [0, 0];
@@ -138,9 +190,32 @@ function angle(x, y, r) {
 
 function DrawText({ e }) {
   const attr = e.mxGeometry._attributes;
+  if (e.text.length == 0) {
+    return <></>;
+  }
+  const text = e.text.split('-');
+  const t = [];
+  let i = 1;
+  while (i < text?.length) {
+    const b = text[i - 1] + '-' + text[i];
+    if (b.length * 8 < attr.width) {
+      t.push(b);
+      i += 2;
+    } else if (i == text?.length - 1) {
+      t.push(text[i - 1] + '-');
+      t.push(text[i]);
+      i++;
+    } else {
+      t.push(text[i - 1] + '-');
+      i++;
+    }
+  }
+  if (t.length == 0) {
+    t.push(text?.[0]);
+  }
   return (
     <g key={e.id}>
-      {e.text.map((a, index) => {
+      {t?.map((a, index) => {
         return (
           <text
             key={index}
@@ -149,11 +224,9 @@ function DrawText({ e }) {
             width={attr.width}
             height={attr.height}
             textAnchor="middle"
-            style={{
-              userSelect: 'none',
-            }}
+            style={{ fill: 'black' }}
           >
-            {a[a.length - 1]}
+            {a}
           </text>
         );
       })}
@@ -161,29 +234,46 @@ function DrawText({ e }) {
   );
 }
 
-function DrawShape({ e }) {
+function DrawShape({
+  e,
+  isBRA,
+  selectedObjectL,
+  selectedObjectR,
+  selectedRelation,
+  frg,
+}) {
   const attr = e.mxGeometry._attributes;
-  const selectedObject = useRecoilValue(selectedObjectState);
-  const selectedRelation = useRecoilValue(selectedRelationState);
-  const selectedObjectR = useRecoilValue(selectedObjectStateR);
-  const frg = useRecoilValue(frgDataState);
-  const isSource = selectedRelation ? selectedRelation[0] == e.name : false;
-  const isTarget = selectedRelation ? selectedRelation[1] == e.name : false;
-  const isSelectedR = frg
-    .find((f) => f[0] == selectedObjectR?.text?.[0])?.[1]
-    .includes(e.name);
 
-  const color =
-    selectedObject == e
-      ? 'red'
-      : isSelectedR
-      ? 'green'
-      : isSource
-      ? 'red'
-      : isTarget
-      ? 'blue'
-      : 'black';
-  //console.log(e);
+  function left() {
+    const isSource = selectedRelation?.[0] == e.text;
+    const isTarget = selectedRelation?.[1] == e.text;
+    const isFrg = frg
+      .find((f) => f[0] == selectedObjectR?.text)?.[1]
+      .includes(e.text);
+
+    const color =
+      selectedObjectL == e
+        ? 'red'
+        : isFrg
+        ? 'green'
+        : isSource
+        ? 'red'
+        : isTarget
+        ? 'blue'
+        : 'black';
+    return color;
+  }
+
+  function right() {
+    const isFrg = frg
+      ?.filter((f) => f[1].includes(selectedObjectL?.text))
+      .map((f) => f[0])
+      .includes(e.text);
+    const color = selectedObjectR == e ? 'red' : isFrg ? 'green' : 'black';
+    return color;
+  }
+
+  const color = isBRA ? left() : right();
   return (
     <g key={e.id}>
       {e.shape == 'ellipse' ? (
@@ -225,34 +315,29 @@ function DrawShape({ e }) {
           />
         </g>
       )}
-      {e.text.map((a, index) => {
-        return (
-          <text
-            key={index}
-            x={attr.x * 1 + attr.width / 2}
-            y={attr.y * 1 + attr.height / 2 + index * 20}
-            width={attr.width}
-            height={attr.height}
-            textAnchor="middle"
-            fill={color}
-            style={{ fill: 'black' }}
-          >
-            {a[a.length - 1]}
-          </text>
-        );
-      })}
+      <DrawText e={e} />
     </g>
   );
 }
 
-function DrawArrow({ e }) {
-  const [selectedObject, setSelectedObject] =
-    useRecoilState(selectedObjectState);
-  const selectedRelation = useRecoilValue(selectedRelationState);
-  const hightlightRelation = selectedRelation
-    ? selectedRelation[0] == e.source.text[0][1] &&
-      selectedRelation[1] == e.target.text[0][1]
-    : false;
+function DrawArrow({
+  e,
+  isBRA,
+  selectedObjectL,
+  selectedObjectR,
+  selectedRelation,
+}) {
+  function left() {
+    const hightlightRelation = selectedRelation
+      ? selectedRelation[0] == e.source.text &&
+        selectedRelation[1] == e.target.text
+      : false;
+    return selectedObjectL == e || hightlightRelation ? 'red' : 'black';
+  }
+  function right() {
+    return selectedObjectR == e ? 'red' : 'black';
+  }
+  const color = isBRA ? left() : right();
   const sourcePointAttributes = e.source.mxGeometry._attributes;
   const targetPointAttributes = e.target.mxGeometry._attributes;
   const rx = (sourcePointAttributes.width * 1) / 2;
@@ -302,13 +387,7 @@ function DrawArrow({ e }) {
   );
 
   return (
-    <g
-      key={e.id}
-      onClick={() => {
-        setSelectedObject(e);
-      }}
-      style={{ cursor: 'pointer' }}
-    >
+    <g key={e.id}>
       {arrayPoints.map((p, index, ary) => {
         if (index < arrayPoints.length - 1) {
           return (
@@ -320,10 +399,8 @@ function DrawArrow({ e }) {
                 x2={arrayPoints[index + 1][0]}
                 y2={arrayPoints[index + 1][1]}
                 strokeWidth={3}
-                stroke={
-                  selectedObject == e || hightlightRelation ? 'red' : 'black'
-                }
-                markerEnd={ary.length - 2 == index ? 'url(#mu_mh)' : ''}
+                stroke={color}
+                markerEnd={ary.length - 2 == index ? `url(#${color})` : ''}
               />
               <line
                 key={1}
