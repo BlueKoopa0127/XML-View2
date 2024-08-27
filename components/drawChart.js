@@ -38,6 +38,7 @@ export function DrawChart({ drawData, isBRA }) {
       <g
         key={e.id}
         onClick={() => {
+          console.log(e);
           setSelectedObject(e);
         }}
         style={{ userSelect: 'none', cursor: 'pointer' }}
@@ -265,10 +266,16 @@ function DrawShape({
   }
 
   function right() {
+    // const isFrg = frg
+    //   ?.filter((f) => f[1].has(selectedObjectL?.id))
+    //   .map((f) => f[0])
+    //   .includes(e.text);
     const isFrg = frg
-      ?.filter((f) => f[1].includes(selectedObjectL?.text))
-      .map((f) => f[0])
-      .includes(e.text);
+      ? Object.entries(frg)
+          ?.filter((f) => f[1].has(selectedObjectL?.id))
+          .map((f) => f[0])
+          .includes(e.text)
+      : false;
     const color = selectedObjectR == e ? 'red' : isFrg ? 'green' : 'black';
     return color;
   }

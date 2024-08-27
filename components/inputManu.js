@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue, atom } from 'recoil';
 import { xml2json } from 'xml-js';
+import dagre from '@dagrejs/dagre';
 
 import { Input, Button, Card, Typography, Link } from '@mui/material';
-
-export const drawDataUrlState = atom({
-  key: 'drawDataUrlState',
-  default: 'Miya_sample.drawio.xml',
-});
 
 export const rightDrawDataUrlState = atom({
   key: 'rightDrawDataUrlState',
@@ -17,7 +13,7 @@ export const rightDrawDataUrlState = atom({
 export const relatedDataUrlState = atom({
   key: 'relatedDataUrlState',
   default:
-    'https://script.googleusercontent.com/macros/echo?user_content_key=wZFUnEmoO7K7s6J0kF76ByqNaR-gh6tCDVMyCByo-KxoSrCoGJ0em6IobfLWuXfaiTAApITNxOO_jjLNOuG7_Y_HhFvAlTHGm5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnO4U8AaCWv4-hT70SQmyTDCJEyXGdmRh75K4f-DKGjEpShpjlHg2cpbU8iYGNeUFOZoTVvnmM10b3nFytkSkJpy-UfPJnbVyDg&lib=M7Y24gl0mIsKDqTjOoU4Pzk4IkG4fjIwP',
+    'https://script.googleusercontent.com/macros/echo?user_content_key=pOWAyIM-b-J2OpMs0HPZe8r0EwiAki9o0_o0wa7LK1swU4ICsbTPD_qQNa7qqxA-lLXLGGtQ82-suuUTavuZfhsfyjF_8OF6m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnDYKF2zFn5OZnyVKWYnPBfZ3YQEck7XSO0gXijE891CHit92B2yvMLzggcX7-Jsi0PcmMlzXkJaTg89XpJdTBtk0VSA0nS2m9dz9Jw9Md8uu&lib=MKxHInl40nO0X9VMVsZQb7jQfreIY07W7',
 });
 
 export const drawDataState = atom({
@@ -46,7 +42,6 @@ export const frgDataState = atom({
 });
 
 export function InputMenu() {
-  const [drawDataUrl, setDrawDataUrl] = useRecoilState(drawDataUrlState);
   const [rightDrawDataUrl, setRightDrawDataUrl] = useRecoilState(
     rightDrawDataUrlState,
   );
@@ -55,24 +50,6 @@ export function InputMenu() {
   return (
     <>
       <div>
-        <div>
-          <Input
-            accept="*.xml"
-            style={{ display: 'none' }}
-            id="drawDataUrl"
-            type="file"
-            onChange={(e) => setDrawDataUrl(e.target.files[0])}
-          />
-          <label htmlFor="drawDataUrl">
-            <Button variant="contained" component="span">
-              ファイルを選択
-            </Button>
-          </label>
-          {drawDataUrl && (
-            <p>BRA Imageのxmlファイル名: {drawDataUrl.name ?? drawDataUrl}</p>
-          )}
-        </div>
-
         <div>
           <Input
             accept="*.xml"
@@ -138,7 +115,6 @@ export function InputMenu() {
 }
 
 export function dataImport() {
-  const drawDataUrl = useRecoilValue(drawDataUrlState);
   const [drawData, setDrawData] = useRecoilState(drawDataState);
 
   const rightDrawDataUrl = useRecoilValue(rightDrawDataUrlState);
@@ -151,61 +127,6 @@ export function dataImport() {
   const [referencesData, setReferencesData] =
     useRecoilState(referencesDataState);
   const [referencesDataAll, setReferencesDataAll] = useState([]);
-  const [relatedDataAll, setRelatedDataAll] = useState([]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const url =
-        typeof drawDataUrl == 'string'
-          ? drawDataUrl
-          : window.URL.createObjectURL(drawDataUrl);
-      const res = await fetch(url);
-      if (
-        !(
-          res.status == 200 &&
-          relatedDataAll != null &&
-          relatedDataAll.length > 0
-        )
-      ) {
-        throw 'error';
-      }
-      const drawData = await url2json(url);
-      const nodeData = drawData
-        .filter((e) => e.type == 'shape')
-        .map((e) => e.text);
-
-      const filteredRelatedData = relatedDataAll.filter((e) => {
-        return nodeData.includes(e[0]) && nodeData.includes(e[1]);
-      });
-      setRelatedData(filteredRelatedData);
-
-      const relatedFormatDrawData = drawData.map((e) => {
-        if (e.type == 'shape') {
-          return {
-            ...e,
-            literature: filteredRelatedData.filter(
-              (f) =>
-                (e.sourceNodes.map((g) => g.text).includes(f[0]) &&
-                  f[1] == e.text) ||
-                (e.targetNodes.map((g) => g.text).includes(f[1]) &&
-                  f[0] == e.text),
-            ),
-          };
-        } else if (e.type == 'arrow') {
-          return {
-            ...e,
-            literature: filteredRelatedData.filter(
-              (f) => f[0] == e.source.text && f[1] == e.target.text,
-            ),
-          };
-        } else {
-          return e;
-        }
-      });
-      setDrawData(relatedFormatDrawData);
-    };
-    fetchData();
-  }, [drawDataUrl, relatedDataAll]);
 
   useEffect(() => {
     console.log(rightDrawDataUrl);
@@ -221,9 +142,29 @@ export function dataImport() {
       const res = await fetch(relatedDataUrl);
       if (res.status == 200) {
         const text = await res.json();
-        setRelatedDataAll(text['connections']);
+        text['connections'].shift();
+        text['frg'].shift();
+
         setReferencesDataAll(text['references']);
-        setFrgData(text['frg']);
+        setFrgData(
+          text['frg'].reduce((acc, e) => {
+            acc[e[0]] = new Set(e[1]);
+            return acc;
+          }, {}),
+        );
+
+        const edges = text['connections'];
+        console.log(edges);
+
+        const compound = text['compound'];
+        console.log('Compound', compound);
+
+        const nodes = getNodesFromLinks(edges);
+        console.log('Nodes', nodes);
+
+        const dagreLayout = getDagreLayout(nodes, edges, compound);
+        console.log('DAGRE', dagreLayout);
+        setDrawData(dagreLayout);
       }
     };
     fetchData();
@@ -232,25 +173,102 @@ export function dataImport() {
   useEffect(() => {
     //console.log(referencesDataAll);
     //console.log(relatedData);
-    const filteredReferencesData = referencesDataAll.filter((e) => {
-      return relatedData.map((f) => f[2]).includes(e[0]);
-    });
-    const br = filteredReferencesData.map((e) => {
-      return [
-        e[0],
-        e[1].split('\n').map((f) => {
-          return (
-            <>
-              {f}
-              <br />
-            </>
-          );
-        }),
-        e[1],
-      ];
+    // const filteredReferencesData = referencesDataAll.filter((e) => {
+    //   return relatedData.map((f) => f[2]).includes(e[0]);
+    // });
+
+    let br = {};
+    referencesDataAll.map((e) => {
+      br[e[0]] = e[1].split('\n').map((f) => {
+        return (
+          <>
+            {f}
+            <br />
+          </>
+        );
+      });
+      // return [
+      //   e[0],
+      //   e[1].split('\n').map((f) => {
+      //     return (
+      //       <>
+      //         {f}
+      //         <br />
+      //       </>
+      //     );
+      //   }),
+      //   e[1],
+      // ];
     });
     setReferencesData(br);
-  }, [referencesDataAll, relatedData]);
+  }, [referencesDataAll]);
+}
+function getNodesFromLinks(edges) {
+  let graph = {};
+
+  edges.forEach((e) => {
+    if (!graph[e[0]]) {
+      graph[e[0]] = createNode(e[0]);
+    }
+    if (!graph[e[1]]) {
+      graph[e[1]] = createNode(e[1]);
+    }
+  });
+
+  edges.forEach((e) => {
+    graph[e[0]].target.push(graph[e[1]].id);
+  });
+
+  return Object.values(graph);
+}
+
+function createNode(id) {
+  return {
+    id: id,
+    target: [],
+  };
+}
+function getDagreLayout(nodes, edges, compound) {
+  var g = new dagre.graphlib.Graph({
+    directed: true,
+    compound: true,
+    multigraph: false,
+  });
+
+  // Set an object for the graph label
+  g.setGraph({
+    rankdir: 'TB', // 'TB' for top to bottom layout
+    nodesep: 50, // horizontal space between nodes
+    edgesep: 10, // horizontal space between edges
+    ranksep: 50, // vertical space between nodes
+    marginx: 100,
+    marginy: 100,
+
+    acyclicer: 'greedy',
+    ranker: 'longest-path',
+  });
+
+  g.setDefaultEdgeLabel(function () {
+    return {};
+  });
+  nodes.map((e) => {
+    g.setNode(e, { label: e, width: 10, height: 10 });
+  });
+
+  edges.map((e) => {
+    g.setEdge(e[0], e[1], [e[2], e[3]]);
+  });
+
+  compound.map((e) => {
+    e[1].map((f) => {
+      if (e[0] != f) {
+        g.setParent(f, e[0]);
+      }
+    });
+  });
+
+  console.log(g);
+  return g;
 }
 
 async function url2json(url) {

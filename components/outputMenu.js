@@ -17,15 +17,17 @@ export function OutputMenu() {
 
   const [referenceData, setReferenceData] = useState(null);
   useEffect(() => {
-    setReferenceData(
-      referencesData?.find((e) => e?.[0] == selectedRelation?.[2]),
-    );
+    if (selectedRelation) {
+      setReferenceData(referencesData[selectedRelation.reference[0]]);
+    } else {
+      setReferenceData(null);
+    }
   }, [selectedRelation]);
   // console.log(referenceData);
 
   useEffect(() => {
-    if (selectedObject?.type == 'arrow') {
-      setSelectedRelation(selectedObject.literature[0]);
+    if (selectedObject && selectedObject?.edges == undefined) {
+      setSelectedRelation(selectedObject);
     } else {
       setSelectedRelation(null);
     }
@@ -40,14 +42,7 @@ export function OutputMenu() {
     >
       {selectedObject == null
         ? 'ノードやエッジをクリックしてください'
-        : '選択しているオブジェクト：'}
-      {selectedObject == null
-        ? ''
-        : selectedObject?.literature?.length == 0
-        ? 'データが存在していません'
-        : selectedObject?.literature[0][0] +
-          ' → ' +
-          selectedObject?.literature[0][1]}
+        : '選択しているオブジェクト：' + selectedObject.id}
     </Box>
   );
   console.log(selectedObject);
@@ -59,7 +54,10 @@ export function OutputMenu() {
   return (
     <div>
       {title}
-      {selectedObject.literature.map((e, i) => {
+      {(selectedObject?.edges == undefined
+        ? [selectedObject]
+        : selectedObject.edges
+      ).map((e, i) => {
         return (
           <div key={i}>
             <Box
@@ -75,13 +73,13 @@ export function OutputMenu() {
             >
               <Grid container spacing={2}>
                 <Grid item xs={5.5}>
-                  <Typography align="center">{e[0]}</Typography>
+                  <Typography align="center">{e.source}</Typography>
                 </Grid>
                 <Grid item xs={1}>
                   →
                 </Grid>
                 <Grid item xs={5.5}>
-                  <Typography align="center">{e[1]}</Typography>
+                  <Typography align="center">{e.target}</Typography>
                 </Grid>
               </Grid>
             </Box>
@@ -94,9 +92,9 @@ export function OutputMenu() {
           Pointers on literature : <br />
           {selectedRelation == null
             ? '上の項目か右図中の矢印をクリック'
-            : selectedRelation[3] == ''
+            : selectedRelation.reference[1] == ''
             ? 'データが存在していません'
-            : selectedRelation[3]}
+            : selectedRelation.reference[1]}
         </Typography>
       </Box>
 
@@ -111,11 +109,9 @@ export function OutputMenu() {
         >
           Bibtexをコピーする
         </Button>
-        {referencesData
-          ?.find((e) => e?.[0] == selectedRelation?.[2])?.[1]
-          ?.map((e, i) => {
-            return <Typography key={i}>{e}</Typography>;
-          })}
+        {referenceData?.map((e, i) => {
+          return <Typography key={i}>{e}</Typography>;
+        })}
       </Box>
     </div>
   );
