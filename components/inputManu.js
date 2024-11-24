@@ -13,7 +13,13 @@ export const rightDrawDataUrlState = atom({
 export const relatedDataUrlState = atom({
   key: 'relatedDataUrlState',
   default:
-    'https://script.googleusercontent.com/macros/echo?user_content_key=pOWAyIM-b-J2OpMs0HPZe8r0EwiAki9o0_o0wa7LK1swU4ICsbTPD_qQNa7qqxA-lLXLGGtQ82-suuUTavuZfhsfyjF_8OF6m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnDYKF2zFn5OZnyVKWYnPBfZ3YQEck7XSO0gXijE891CHit92B2yvMLzggcX7-Jsi0PcmMlzXkJaTg89XpJdTBtk0VSA0nS2m9dz9Jw9Md8uu&lib=MKxHInl40nO0X9VMVsZQb7jQfreIY07W7',
+    'https://docs.google.com/spreadsheets/d/1E22mAQftP9xf2lDWZ734l0teWgaUCcFCpjzf2Y8Sk30/edit?gid=1487323325#gid=1487323325',
+  // 'https://script.googleusercontent.com/macros/echo?user_content_key=pOWAyIM-b-J2OpMs0HPZe8r0EwiAki9o0_o0wa7LK1swU4ICsbTPD_qQNa7qqxA-lLXLGGtQ82-suuUTavuZfhsfyjF_8OF6m5_BxDlH2jW0nuo2oDemN9CCS2h10ox_1xSncGQajx_ryfhECjZEnDYKF2zFn5OZnyVKWYnPBfZ3YQEck7XSO0gXijE891CHit92B2yvMLzggcX7-Jsi0PcmMlzXkJaTg89XpJdTBtk0VSA0nS2m9dz9Jw9Md8uu&lib=MKxHInl40nO0X9VMVsZQb7jQfreIY07W7',
+});
+
+export const relatedDataAllState = atom({
+  key: 'relatedDataAllState',
+  default: null,
 });
 
 export const drawDataState = atom({
@@ -120,7 +126,7 @@ export function dataImport() {
   const rightDrawDataUrl = useRecoilValue(rightDrawDataUrlState);
   const [rightDrawData, setRightDrawData] = useRecoilState(rightDrawDataState);
 
-  const relatedDataUrl = useRecoilValue(relatedDataUrlState);
+  const relatedDataAll = useRecoilValue(relatedDataAllState);
   const [relatedData, setRelatedData] = useRecoilState(relatedDataState);
   const [frgData, setFrgData] = useRecoilState(frgDataState);
 
@@ -138,37 +144,35 @@ export function dataImport() {
   }, [rightDrawDataUrl]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch(relatedDataUrl);
-      if (res.status == 200) {
-        const text = await res.json();
-        text['connections'].shift();
-        text['frg'].shift();
+    if (relatedDataAll) {
+      const text = relatedDataAll;
 
-        setReferencesDataAll(text['references']);
-        setFrgData(
-          text['frg'].reduce((acc, e) => {
-            acc[e[0]] = new Set(e[1]);
-            return acc;
-          }, {}),
-        );
+      const frg = [...text['frg']];
+      frg.shift();
 
-        const edges = text['connections'];
-        console.log(edges);
+      setReferencesDataAll(text['references']);
+      setFrgData(
+        text['frg'].reduce((acc, e) => {
+          acc[e[0]] = new Set(e[1]);
+          return acc;
+        }, {}),
+      );
 
-        const compound = text['compound'];
-        console.log('Compound', compound);
+      const edges = [...text['connections']];
+      edges.shift();
+      console.log(edges);
 
-        const nodes = getNodesFromLinks(edges);
-        console.log('Nodes', nodes);
+      const compound = text['compound'];
+      console.log('Compound', compound);
 
-        const dagreLayout = getDagreLayout(nodes, edges, compound);
-        console.log('DAGRE', dagreLayout);
-        setDrawData(dagreLayout);
-      }
-    };
-    fetchData();
-  }, [relatedDataUrl]);
+      const nodes = getNodesFromLinks(edges);
+      console.log('Nodes', nodes);
+
+      const dagreLayout = getDagreLayout(nodes, edges, compound);
+      console.log('DAGRE', dagreLayout);
+      setDrawData(dagreLayout);
+    }
+  }, [relatedDataAll]);
 
   useEffect(() => {
     //console.log(referencesDataAll);

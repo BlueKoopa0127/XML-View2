@@ -10,17 +10,20 @@ import { Grid, Typography } from '@mui/material';
 import { drawDataState, rightDrawDataState } from '../components/inputManu';
 import { useRecoilValue } from 'recoil';
 import AutoDrawChart from '../components/autoDrawChart';
+import SpreadsheetComponent from './sheet';
 
 export default function Home({ Title }) {
   const drawData = useRecoilValue(drawDataState);
   const rightDrawData = useRecoilValue(rightDrawDataState);
   const referencesData = useRecoilValue(referencesDataState);
+  SpreadsheetComponent();
   dataImport();
   console.log(drawData);
   console.log(rightDrawData);
   console.log(referencesData);
   console.log(AutoDrawChart?.cyRef?.current);
   console.log(new Set(['BA_F', 'BA_E']).has('BA_E'));
+
   return (
     <Container maxWidth="xl">
       <Grid container spacing={2} marginY={10}>
