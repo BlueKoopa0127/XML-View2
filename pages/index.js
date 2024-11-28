@@ -18,11 +18,11 @@ export default function Home({ Title }) {
   const referencesData = useRecoilValue(referencesDataState);
   SpreadsheetComponent();
   dataImport();
-  console.log(drawData);
-  console.log(rightDrawData);
-  console.log(referencesData);
-  console.log(AutoDrawChart?.cyRef?.current);
-  console.log(new Set(['BA_F', 'BA_E']).has('BA_E'));
+  // console.log(drawData);
+  // console.log(rightDrawData);
+  // console.log(referencesData);
+  // console.log(AutoDrawChart?.cyRef?.current);
+  // console.log(new Set(['BA_F', 'BA_E']).has('BA_E'));
 
   return (
     <Container maxWidth="xl">

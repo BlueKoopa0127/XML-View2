@@ -10,8 +10,6 @@ export default function SpreadsheetComponent() {
   const [relatedDataAll, setRelatedDataAll] =
     useRecoilState(relatedDataAllState);
 
-  const API_KEY = ''; // 取得したAPIキー
-  // const SPREADSHEET_ID = '1E22mAQftP9xf2lDWZ734l0teWgaUCcFCpjzf2Y8Sk30'; // スプレッドシートのID
   const RANGES = ['Connections', 'Circuits', 'References', 'FRG(I/O表示)'];
   const COLUMNS = {
     Connections: [
@@ -31,11 +29,12 @@ export default function SpreadsheetComponent() {
       try {
         // スプレッドシートからデータを取得
         const response = await fetch(
-          `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values:batchGet?ranges=${RANGES.map(
+          `/api/sheetAPI?id=${SPREADSHEET_ID}&ranges=${RANGES.map(
             encodeURIComponent,
-          ).join('&ranges=')}&majorDimension=COLUMNS&key=${API_KEY}`,
+          ).join('&ranges=')}`,
         );
 
+        console.log(response);
         const result = await response.json();
         console.log(result);
 
