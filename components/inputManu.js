@@ -3,7 +3,7 @@ import { useRecoilState, useRecoilValue, atom } from 'recoil';
 import { xml2json } from 'xml-js';
 import dagre from '@dagrejs/dagre';
 
-import { Input, Button, Card, Typography, Link } from '@mui/material';
+import { Input, Button, Card, Typography, Link, Box } from '@mui/material';
 
 export const rightDrawDataUrlState = atom({
   key: 'rightDrawDataUrlState',
@@ -47,12 +47,36 @@ export const frgDataState = atom({
   default: null,
 });
 
+export const filterDataState = atom({
+  key: 'filterDataState',
+  default: new Set([
+    'LaV',
+    'LaD',
+    'BA_E',
+    'BA_F',
+    'INAdm',
+    'INAvm',
+    'INA',
+    'BA',
+    'La',
+  ]),
+});
+
 export function InputMenu() {
   const [rightDrawDataUrl, setRightDrawDataUrl] = useRecoilState(
     rightDrawDataUrlState,
   );
   const [relatedDataUrl, setRelatedDataUrl] =
     useRecoilState(relatedDataUrlState);
+
+  const [filterData, setFilterData] = useRecoilState(filterDataState);
+
+  console.log('FILTER', filterData);
+
+  const [filterText, setFilterText] = useState(
+    Array.from(filterData).join(', '),
+  );
+
   return (
     <>
       <div>
@@ -116,6 +140,25 @@ export function InputMenu() {
           </Typography>
         </Card>
       </div>
+      <Box sx={{ my: '20px' }}>
+        <Typography>ノードのフィルター</Typography>
+        <input
+          type="text"
+          value={filterText}
+          onChange={(event) => {
+            setFilterText(event.target.value);
+            setFilterData(
+              new Set(
+                event.target.value
+                  .replaceAll(' ', '')
+                  .split(',')
+                  .filter((e) => e != ''),
+              ),
+            );
+          }}
+          style={{ width: '100%' }}
+        />
+      </Box>
     </>
   );
 }
@@ -133,6 +176,8 @@ export function dataImport() {
   const [referencesData, setReferencesData] =
     useRecoilState(referencesDataState);
   const [referencesDataAll, setReferencesDataAll] = useState([]);
+
+  const filterData = useRecoilValue(filterDataState);
 
   useEffect(() => {
     console.log(rightDrawDataUrl);
@@ -158,11 +203,19 @@ export function dataImport() {
         }, {}),
       );
 
-      const edges = [...text['connections']];
-      edges.shift();
-      console.log(edges);
+      const edges = [...text['connections']].filter(
+        (e) =>
+          filterData.size == 0 || filterData.has(e[0]) || filterData.has(e[1]),
+      );
+      // edges.shift();
+      console.log('Edges', edges);
 
-      const compound = text['compound'];
+      const compound = text['compound'].filter(
+        (e) =>
+          filterData.size == 0 ||
+          filterData.has(e[0]) ||
+          e[1].some((f) => filterData.has(f)),
+      );
       console.log('Compound', compound);
 
       const nodes = getNodesFromLinks(edges);
@@ -172,7 +225,7 @@ export function dataImport() {
       console.log('DAGRE', dagreLayout);
       setDrawData(dagreLayout);
     }
-  }, [relatedDataAll]);
+  }, [relatedDataAll, filterData]);
 
   useEffect(() => {
     //console.log(referencesDataAll);
